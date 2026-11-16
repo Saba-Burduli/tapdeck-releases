@@ -26,22 +26,24 @@
   </header>
 
   <main>
-    <div class="stage">
-      <!-- The film as the introduction's backdrop: the teaser without its captions, silent, looping. -->
-      <div class="stage-film" aria-hidden="true">
-        <video class="wide" data-src="assets/hero.mp4" poster="assets/hero-poster.jpg" muted loop playsinline autoplay></video>
-        <video class="tall" data-src="assets/hero-tall.mp4" poster="assets/hero-poster-tall.jpg" muted loop playsinline autoplay></video>
+    <div class="hero wrap">
+      <img class="icon" src="assets/icon.png" alt="TapDeck icon">
+      <h1>Your trackpad<br><span class="soft">is a shortcut panel.</span></h1>
+      <p class="lede">Tap with three fingers to open Claude. Tap with four to snap a window. TapDeck turns quick multi-finger taps into the shortcuts you use all day.</p>
+      <div class="cta">
+        <a class="btn primary buy" href="#pricing">Buy for $9 a year</a>
+        <a class="btn ghost" href="#film">Watch the film</a>
       </div>
-      <div class="hero wrap">
-        <img class="icon" src="assets/icon.png" alt="TapDeck icon">
-        <h1>Your trackpad<br><span class="soft">is a shortcut panel.</span></h1>
-        <p class="lede">Tap with three fingers to open Claude. Tap with four to snap a window. TapDeck turns quick multi-finger taps into the shortcuts you use all day.</p>
-        <div class="cta">
-          <a class="btn primary buy" href="#pricing">Buy for $9 a year</a>
-          <a class="btn ghost" href="#how">How it works</a>
-        </div>
-        <p class="fine">macOS 14 Sonoma or later · built-in trackpad or Magic Trackpad</p>
-      </div>
+      <p class="fine">macOS 14 Sonoma or later · built-in trackpad or Magic Trackpad</p>
+    </div>
+
+    <div class="band" aria-hidden="true"></div>
+    <div class="film" id="film">
+      <video class="wide" data-src="assets/teaser.mp4" poster="assets/poster.jpg" muted loop playsinline autoplay></video>
+      <video class="tall" data-src="assets/teaser-tall.mp4" poster="assets/poster-tall.jpg" muted loop playsinline autoplay></video>
+      <button class="sound" type="button" aria-label="Turn sound on" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M4 9h4l5-4v14l-5-4H4z"/><path class="wave" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/><path class="mute" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M16 9l6 6M22 9l-6 6"/></svg>
+      </button>
     </div>
 
     <section id="how" class="wrap">
@@ -131,9 +133,9 @@
     }
   </script>
   <script>
-    // The film is the introduction's backdrop: silent (no audio track at all), looping, fading into the water. Only the one that fits the screen loads.
+    // The film plays silently on a loop, as part of the page. Only the one that fits the screen loads.
     (() => {
-      const film = document.querySelector('.stage-film');
+      const film = document.getElementById('film');
       const videos = [...film.querySelectorAll('video')];
       const pick = () => {
         for (const v of videos) {
@@ -145,6 +147,13 @@
       };
       pick();
       addEventListener('resize', pick);
+      const button = film.querySelector('.sound');
+      button.addEventListener('click', () => {
+        const on = videos[0].muted;
+        for (const v of videos) v.muted = !on;
+        button.setAttribute('aria-pressed', String(on));
+        button.setAttribute('aria-label', on ? 'Turn sound off' : 'Turn sound on');
+      });
     })();
   </script>
 </body>
