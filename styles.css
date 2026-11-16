@@ -74,19 +74,21 @@ h1 .soft { color: var(--muted); }
 .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .fine { font-size: 13px; color: var(--muted); margin-top: 14px; }
 
-.band { height: 54px; background: var(--rainbow); margin: 40px 0 0; opacity: 0.9; }
 
-/* Video */
-.film { position: relative; margin: -27px auto 0; width: min(1080px, 100% - 32px); border-radius: var(--radius); overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,0.22); background: #000; }
+/* Video: part of the page, not a player. Bigger than the text column, and its edges fade into the water. */
+.film {
+  position: relative;
+  width: min(1500px, 100vw);
+  margin: 8px auto -40px;
+  pointer-events: none;
+  /* A feathered rectangle (a blurred SVG rect): the edges melt over the outer few percent, captions stay clear. */
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cfilter id='f' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeGaussianBlur stdDeviation='1.8 3.2'/%3E%3C/filter%3E%3Crect x='4.5' y='8' width='91' height='84' fill='%23fff' filter='url(%23f)'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cfilter id='f' x='-20%25' y='-20%25' width='140%25' height='140%25'%3E%3CfeGaussianBlur stdDeviation='1.8 3.2'/%3E%3C/filter%3E%3Crect x='4.5' y='8' width='91' height='84' fill='%23fff' filter='url(%23f)'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+}
 .film video { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
-.film .sound { position: absolute; right: 14px; bottom: 14px; width: 38px; height: 38px; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer;
-  color: #fff; background: rgba(23, 25, 29, 0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); opacity: 0.75; transition: opacity .2s ease; }
-.film .sound:hover { opacity: 1; }
-.film .sound .wave { display: none; }
-.film .sound[aria-pressed="true"] .wave { display: block; }
-.film .sound[aria-pressed="true"] .mute { display: none; }
 .film video.tall { display: none; aspect-ratio: 9 / 16; }
 @media (max-width: 640px) {
+  .film { margin-bottom: -24px; }
   .film video.wide { display: none; }
   .film video.tall { display: block; }
 }
