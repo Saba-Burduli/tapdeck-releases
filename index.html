@@ -20,7 +20,6 @@
         <a class="link" href="#how">How it works</a>
         <a class="link" href="#pricing">Pricing</a>
         <a class="link" href="#faq">FAQ</a>
-        <!-- BUY: set href to the Dodo Payments checkout link -->
         <a class="btn primary small buy" href="#pricing">Buy</a>
       </nav>
     </div>
@@ -120,6 +119,17 @@
     </div>
   </footer>
   <script src="water.js"></script>
+  <script>
+    // Buy buttons go to Dodo's static payment link once the live product exists; until then they scroll to Pricing.
+    // Set PRODUCT_ID to the live "TapDeck — 1 year" product (pdt_…) from the Dodo dashboard.
+    const PRODUCT_ID = null;
+    if (PRODUCT_ID) {
+      const url = new URL(`https://checkout.dodopayments.com/buy/${PRODUCT_ID}`);
+      url.searchParams.set('quantity', '1');
+      url.searchParams.set('redirect_url', new URL('thanks.html', location.href).href);
+      for (const a of document.querySelectorAll('a.buy')) a.href = url.href;
+    }
+  </script>
   <script>
     // The film is the introduction's backdrop: silent (no audio track at all), looping, fading into the water. Only the one that fits the screen loads.
     (() => {
