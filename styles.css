@@ -65,30 +65,39 @@ header.top nav a:hover { color: var(--ink); }
 .btn.ghost { color: var(--ink); background: var(--surface); box-shadow: inset 0 0 0 1px var(--faint); }
 .btn.small { padding: 8px 16px; font-size: 14px; }
 
-/* Hero */
-.hero { text-align: center; padding: 72px 0 36px; }
-.hero .icon { width: 112px; height: 112px; margin: 0 auto 22px; filter: drop-shadow(0 14px 28px rgba(0,0,0,0.22)); }
-h1 { font-size: clamp(40px, 7vw, 76px); line-height: 1.02; letter-spacing: -0.045em; margin: 0 0 16px; font-weight: 800; }
+
+/* Introduction: the film fills the top of the page behind the headline, edge to edge. */
+.stage { position: relative; min-height: min(94vh, 960px); display: flex; align-items: center; overflow: hidden; }
+.stage-film {
+  position: absolute; inset: 0; pointer-events: none;
+  /* Edge to edge; only the bottom fades into the page below. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+}
+.stage-film video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 50%; }
+.stage-film video.tall { display: none; }
+/* A soft scrim on the text side, in the page colour, so the headline reads in light and dark. */
+.stage-film::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--bg) 72%, transparent) 0%, color-mix(in srgb, var(--bg) 35%, transparent) 38%, transparent 58%); }
+@media (prefers-color-scheme: dark) { .stage-film video { filter: brightness(0.62) saturate(1.05); } }
+
+.hero { position: relative; padding: 96px 0 72px; text-align: left; }
+.hero > * { max-width: 560px; }
+.hero .icon { width: 84px; height: 84px; margin: 0 0 22px; filter: drop-shadow(0 14px 28px rgba(0,0,0,0.22)); }
+h1 { font-size: clamp(40px, 6.2vw, 76px); line-height: 1.02; letter-spacing: -0.045em; margin: 0 0 16px; font-weight: 800; }
 h1 .soft { color: var(--muted); }
-.lede { font-size: clamp(18px, 2.2vw, 21px); color: var(--muted); max-width: 620px; margin: 0 auto 28px; }
-.cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.lede { font-size: clamp(18px, 2vw, 21px); color: var(--muted); margin: 0 0 28px; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; }
 .fine { font-size: 13px; color: var(--muted); margin-top: 14px; }
 
-.band { height: 54px; background: var(--rainbow); margin: 40px 0 0; opacity: 0.9; }
-
-/* Video */
-.film { position: relative; margin: -27px auto 0; width: min(1080px, 100% - 32px); border-radius: var(--radius); overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,0.22); background: #000; }
-.film video { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
-.film .sound { position: absolute; right: 14px; bottom: 14px; width: 38px; height: 38px; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer;
-  color: #fff; background: rgba(23, 25, 29, 0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); opacity: 0.75; transition: opacity .2s ease; }
-.film .sound:hover { opacity: 1; }
-.film .sound .wave { display: none; }
-.film .sound[aria-pressed="true"] .wave { display: block; }
-.film .sound[aria-pressed="true"] .mute { display: none; }
-.film video.tall { display: none; aspect-ratio: 9 / 16; }
-@media (max-width: 640px) {
-  .film video.wide { display: none; }
-  .film video.tall { display: block; }
+/* Phones held upright: the tall cut, laptop on top, text underneath. A narrow desktop window keeps the wide cut. */
+@media (max-width: 640px) and (orientation: portrait) and (pointer: coarse) {
+  .stage { min-height: auto; align-items: flex-end; }
+  .stage-film video.wide { display: none; }
+  .stage-film video.tall { display: block; object-position: 50% 0; }
+  .stage-film::after { background: linear-gradient(180deg, transparent 30%, color-mix(in srgb, var(--bg) 55%, transparent) 55%, color-mix(in srgb, var(--bg) 80%, transparent) 75%); }
+  .hero { padding: 72vw 0 40px; }
+  .hero .icon { width: 64px; height: 64px; margin-bottom: 16px; }
 }
 
 /* Sections */
