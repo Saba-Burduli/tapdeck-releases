@@ -1,6 +1,6 @@
 # TapDeck
 
-Your MacBook trackpad, as a shortcut panel. **$3 a year.**
+Your MacBook trackpad, as a shortcut panel. **$9 a year.**
 
 - Website: https://saba-burduli.github.io/tapdeck-releases/
 - Downloads: see [Releases](https://github.com/Saba-Burduli/tapdeck-releases/releases)
