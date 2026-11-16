@@ -1,7 +1,8 @@
 /* TapDeck site: the teaser's platinum set and rainbow band, the app's dark cards. */
 :root {
   --bg: #ECE9E3;
-  --surface: #F7F6F2;
+  --surface: rgba(255, 255, 255, 0.62);
+  --halo: rgba(236, 239, 244, 0.9);
   --ink: #17191D;
   --muted: rgba(23, 25, 29, 0.62);
   --faint: rgba(23, 25, 29, 0.1);
@@ -16,7 +17,8 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #0E1014;
-    --surface: #15181E;
+    --surface: rgba(29, 32, 39, 0.66);
+    --halo: rgba(14, 16, 20, 0.85);
     --ink: #F2F3F5;
     --muted: rgba(242, 243, 245, 0.62);
     --faint: rgba(255, 255, 255, 0.12);
@@ -25,15 +27,25 @@
 
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+html { background: var(--bg); }
 body {
   margin: 0;
-  background: var(--bg);
+  background: transparent;
   color: var(--ink);
   font: 17px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 a { color: inherit; }
 img, video { display: block; max-width: 100%; }
+
+/* The app's water, behind everything. Static floor colour until WebGL starts. */
+#water { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: -1; opacity: 0; transition: opacity 0.8s ease; }
+#water.on { opacity: 1; }
+/* Glass, as in the app's cards: the pixels show through, softened. */
+.gesture, details, .btn.ghost { backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4); }
+/* Text on the water gets a soft halo, like readableOnWater() in the app. */
+h1, h2, .lede, .section-lede, .fine, .points, footer, .doc > * { text-shadow: 0 0 14px var(--halo), 0 0 32px var(--halo); }
+.price-card, .price-card * { text-shadow: none; }
 .wrap { width: min(1080px, 100% - 32px); margin: 0 auto; }
 
 /* Header */
@@ -67,6 +79,12 @@ h1 .soft { color: var(--muted); }
 /* Video */
 .film { position: relative; margin: -27px auto 0; width: min(1080px, 100% - 32px); border-radius: var(--radius); overflow: hidden; box-shadow: 0 30px 70px rgba(0,0,0,0.22); background: #000; }
 .film video { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.film .sound { position: absolute; right: 14px; bottom: 14px; width: 38px; height: 38px; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer;
+  color: #fff; background: rgba(23, 25, 29, 0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); opacity: 0.75; transition: opacity .2s ease; }
+.film .sound:hover { opacity: 1; }
+.film .sound .wave { display: none; }
+.film .sound[aria-pressed="true"] .wave { display: block; }
+.film .sound[aria-pressed="true"] .mute { display: none; }
 .film video.tall { display: none; aspect-ratio: 9 / 16; }
 @media (max-width: 640px) {
   .film video.wide { display: none; }
