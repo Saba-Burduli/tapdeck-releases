@@ -29,7 +29,7 @@
     <p>Check your spam folder for the email from Dodo Payments, or find the key any time in the Dodo Payments customer portal (the link is in your receipt). Still stuck? Visit <a href="https://github.com/Saba-Burduli/tapdeck-releases/issues">our support page</a>, without posting your key or email publicly.</p>
   </main>
   <footer><div class="wrap"><span>© 2026 TapDeck</span><nav><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refund.html">Refunds</a></nav><p class="legal">Payments are processed by Dodo Payments, our merchant of record.</p></div></footer>
-  <script src="water.js"></script>
+  <script type="module" src="water.js"></script>
   <script>
     // Dodo adds ?status=… to the return URL. Only the wording changes; the key itself always comes from Dodo.
     const status = new URLSearchParams(location.search).get('status');

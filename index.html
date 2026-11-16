@@ -47,16 +47,34 @@
     </div>
 
     <section id="how" class="wrap">
-      <h2>Tap. It happens.</h2>
-      <p class="section-lede">Your hands are already on the trackpad. Every gesture is a shortcut you never have to remember.</p>
-      <div class="gestures">
-        <div class="gesture"><b>3-finger double tap</b><span>Opens Claude from any app, or hides it.</span></div>
-        <div class="gesture"><b>4-finger tap</b><span>Snaps the window to the left half.</span></div>
-        <div class="gesture"><b>4-finger double tap</b><span>Snaps it to the right half.</span></div>
-        <div class="gesture"><b>5-finger tap</b><span>Play or pause your music.</span></div>
-        <div class="gesture"><b>Rest 3 fingers</b><span>Mission Control.</span></div>
-        <div class="gesture"><b>Tap the top-right corner</b><span>Spotlight.</span></div>
+      <h2>Try it.</h2>
+      <p class="section-lede">Tap the trackpad below and watch the Mac answer. <span class="touch-only">Use three, four or five fingers at once.</span><span class="mouse-only">Pick how many fingers, then click. Click once, twice or three times, hold for a moment, or click a corner.</span></p>
+      <div class="demo">
+        <div class="demo-screen">
+          <div class="bezel"><canvas aria-label="A Mac screen that responds to your gestures" role="img"></canvas></div>
+          <div class="demo-pill" role="status" aria-live="polite"><span class="dot"></span><span class="text"></span></div>
+        </div>
+        <div class="demo-side">
+          <div class="demo-apps" role="group" aria-label="App in front">
+            <span>In front</span>
+            <button type="button" data-app="finder" aria-pressed="true"><img src="assets/icons/finder.png" alt="">Finder</button>
+            <button type="button" data-app="chrome" aria-pressed="false"><img src="assets/icons/chrome.png" alt="">Chrome</button>
+          </div>
+          <div class="demo-pad" aria-label="Trackpad: tap here">
+            <canvas aria-hidden="true"></canvas>
+            <i class="corner tl"></i><i class="corner tr"></i>
+            <div class="demo-hold" aria-hidden="true"></div>
+            <span class="pad-hint"><span class="mouse-only">Click here</span><span class="touch-only">Tap with 3, 4 or 5 fingers</span></span>
+          </div>
+          <div class="demo-fingers mouse-only" role="group" aria-label="Fingers per click">
+            <span>Fingers</span>
+            <button type="button" data-n="3">3</button><button type="button" data-n="4">4</button><button type="button" data-n="5">5</button>
+            <kbd>or press 3 · 4 · 5</kbd>
+          </div>
+          <ul class="demo-cheat" aria-label="Gestures"></ul>
+        </div>
       </div>
+      <p class="fine demo-note">On a Mac, browsers never see multi-finger trackpad taps, so here you pick the fingers and click. The real app reads your fingers straight from the trackpad.</p>
     </section>
 
     <section class="wrap">
@@ -120,7 +138,8 @@
       <p class="legal">TapDeck is not affiliated with Apple Inc. Mac, MacBook and macOS are trademarks of Apple Inc. Payments are processed by Dodo Payments, our merchant of record.</p>
     </div>
   </footer>
-  <script src="water.js"></script>
+  <script type="module" src="water.js"></script>
+  <script type="module" src="demo/demo.js"></script>
   <script>
     // Buy buttons go to Dodo's static payment link once the live product exists; until then they scroll to Pricing.
     // Set PRODUCT_ID to the live "TapDeck — 1 year" product (pdt_…) from the Dodo dashboard.

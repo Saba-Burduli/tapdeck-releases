@@ -1,10 +1,11 @@
 // The app's water (Sources/TapDeck/Design/Water.swift), ported from Metal to WebGL2 for the site's background:
 // a wave equation on a height field, seen as a liquid over a screen of red, green and blue subpixels.
-// The pointer presses into it like a finger on the trackpad; a click splashes; drops fall now and then.
-(() => {
-  const canvas = document.getElementById('water');
+// makeWater(canvas) fills the page behind everything: the pointer presses into it like a finger on the trackpad,
+// a click splashes, drops fall now and then. makeWater(canvas, { element: true }) fills one element instead (the demo's
+// trackpad) and is driven by its owner through press(), lift() and splash().
+export function makeWater(canvas, { element = false, autoDrops = !element, fingerRadius = 0.03 } = {}) {
   const gl = canvas && canvas.getContext('webgl2', { premultipliedAlpha: true, antialias: false });
-  if (!gl) return;
+  if (!gl) return null;
   const canRenderFloat = !!gl.getExtension('EXT_color_buffer_float');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const darkQuery = matchMedia('(prefers-color-scheme: dark)');
@@ -149,7 +150,7 @@
     return { p, loc };
   }
   const sim = program(stepFrag), draw = program(drawFrag);
-  if (!sim || !draw) return;
+  if (!sim || !draw) return null;
 
   // Ping-pong height fields: about one cell per 2.5 CSS px, like the app.
   let state = [], fbos = [], gw = 0, gh = 0, current = 0;
@@ -181,21 +182,27 @@
   let cssW = 0, cssH = 0;
   function resize() {
     const dpr = Math.min(devicePixelRatio || 1, 2);
-    cssW = innerWidth; cssH = innerHeight;
+    cssW = element ? Math.max(1, canvas.clientWidth) : innerWidth;
+    cssH = element ? Math.max(1, canvas.clientHeight) : innerHeight;
     canvas.width = Math.round(cssW * dpr);
     canvas.height = Math.round(cssH * dpr);
     const w = Math.max(16, Math.min(640, Math.round(cssW / 2.5)));
     const h = Math.max(16, Math.min(640, Math.round(cssH / 2.5)));
     if (w !== gw || h !== gh) makeState(w, h);
   }
-  addEventListener('resize', resize);
+  if (element) new ResizeObserver(resize).observe(canvas); else addEventListener('resize', resize);
   resize();
 
-  // Fingers: the pointer while it moves, a splash on click, and an occasional drop on its own.
-  let pointer = null, pointerSeen = 0, splash = null, splashSteps = 0, nextDrop = 2, energy = 0;
-  const toUV = (e) => [e.clientX / cssW, e.clientY / cssH];
-  addEventListener('pointermove', (e) => { pointer = toUV(e); pointerSeen = performance.now(); }, { passive: true });
-  addEventListener('pointerdown', (e) => { splash = toUV(e); splashSteps = 5; }, { passive: true });
+  // Fingers. Page: the pointer while it moves, a splash on click, an occasional drop on its own.
+  // Element: whatever the owner presses, as a list of [u, v] points held down.
+  let pointer = null, pointerSeen = 0, splash = [], splashSteps = 0, nextDrop = 2, energy = 0, held = [];
+  if (!element) {
+    const toUV = (e) => [e.clientX / cssW, e.clientY / cssH];
+    // The demo's trackpad has its own water; the page behind it ignores what happens there.
+    const own = (e) => e.target && e.target.closest && e.target.closest('.demo-pad');
+    addEventListener('pointermove', (e) => { if (own(e)) return; pointer = toUV(e); pointerSeen = performance.now(); }, { passive: true });
+    addEventListener('pointerdown', (e) => { if (own(e)) return; splash = [toUV(e)]; splashSteps = 5; }, { passive: true });
+  }
 
   const fingerData = new Float32Array(MAX_FINGERS * 4);
   const blobPos = new Float32Array(24), blobCol = new Float32Array(24);
@@ -217,22 +224,28 @@
   }
 
   const start = performance.now();
-  let last = start, debt = 0, visible = true;
-  document.addEventListener('visibilitychange', () => { visible = !document.hidden; if (visible) { last = performance.now(); requestAnimationFrame(frame); } });
+  let last = start, debt = 0, visible = !document.hidden, onScreen = true, running = false;
+  const wake = () => { if (!running && visible && onScreen) { running = true; last = performance.now(); requestAnimationFrame(frame); } };
+  document.addEventListener('visibilitychange', () => { visible = !document.hidden; wake(); });
+  // An element off screen stops drawing until it scrolls back.
+  if (element) new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; wake(); }).observe(canvas);
 
   function frame(now) {
-    if (!visible) return;
+    if (!visible || !onScreen) { running = false; return; }
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
     const t = (now - start) / 1000;
 
     // Which "fingers" are down this frame.
     let n = 0;
-    const touching = pointer && now - pointerSeen < 120;
-    if (touching && n < MAX_FINGERS) fingerData.set([pointer[0], pointer[1], 0.03, 0.32], 4 * n++);
-    if (splashSteps > 0 && splash) fingerData.set([splash[0], splash[1], 0.055, -0.6], 4 * n++);
-    if (!reduceMotion.matches && t > nextDrop) {
-      splash = [0.08 + Math.random() * 0.84, 0.1 + Math.random() * 0.8];
+    const moving = pointer && now - pointerSeen < 120;
+    const down = element ? held : moving ? [pointer] : [];
+    for (const [u, v] of down) if (n < MAX_FINGERS) fingerData.set([u, v, fingerRadius, 0.32], 4 * n++);
+    const pressed = n;
+    if (splashSteps > 0) for (const [u, v] of splash) if (n < MAX_FINGERS) fingerData.set([u, v, fingerRadius * 1.8, -0.6], 4 * n++);
+    const touching = pressed > 0;
+    if (autoDrops && !reduceMotion.matches && t > nextDrop) {
+      splash = [[0.08 + Math.random() * 0.84, 0.1 + Math.random() * 0.8]];
       splashSteps = 5;
       nextDrop = t + 2.5 + Math.random() * 3;
     }
@@ -255,7 +268,7 @@
       uniforms(sim.loc, t, n);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       current = 1 - current;
-      if (splashSteps > 0) { splashSteps--; if (splashSteps === 0) n = touching ? 1 : 0; }
+      if (splashSteps > 0) { splashSteps--; if (splashSteps === 0) n = pressed; }
     }
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.viewport(0, 0, canvas.width, canvas.height);
@@ -267,5 +280,17 @@
     requestAnimationFrame(frame);
   }
   canvas.classList.add('on');
-  requestAnimationFrame(frame);
-})();
+  wake();
+
+  return {
+    /// Fingers held down at these [u, v] points (0–1 across the element).
+    press(points) { held = points.slice(0, MAX_FINGERS - 4); },
+    lift() { held = []; },
+    /// A drop where fingers just tapped: a bulge that falls back as rings.
+    splash(points) { splash = points.slice(0, 4); splashSteps = 5; },
+  };
+}
+
+// The page's background, wherever a #water canvas exists.
+const background = document.getElementById('water');
+if (background) makeWater(background);

@@ -1,0 +1,176 @@
+// "Try it": a virtual MacBook that answers TapDeck's gestures. The screen is the teaser's macOS desktop; the
+// trackpad is the app's water. Phones and iPads use real fingers. On a Mac the browser never sees multi-finger
+// trackpad taps (macOS keeps them), so visitors pick how many fingers and click.
+import { makeScreen } from './screen.js';
+import { makeRecognizer } from './recognizer.js';
+import { makeWater } from '../water.js';
+
+
+// The app's default packs (Sources/Config/Packs.swift). App packs win while their app is in front.
+const EVERYDAY = { name: 'Everyday Mac', dot: 'rainbow' };
+const CLAUDE = { name: 'Claude', dot: '#D97757' };
+const BROWSER = { name: 'Browser', dot: '#7FB2EE' };
+const BINDINGS = [
+  { key: 'tap4x1', label: '4 fingers · tap', does: 'Snap left', pack: EVERYDAY, run: (a, t) => a.move('left', t) },
+  { key: 'tap4x2', label: '4 fingers · double tap', does: 'Snap right', pack: EVERYDAY, run: (a, t) => a.move('right', t) },
+  { key: 'tap4x3', label: '4 fingers · triple tap', does: 'Full screen', pack: EVERYDAY, run: (a, t) => a.move(a.finderFrame() === 'full' ? 'free' : 'full', t) },
+  { key: 'hold3', label: '3 fingers · hold', does: 'Mission Control', pack: EVERYDAY, run: (a, t) => a.missionControl(t) },
+  { key: 'tap5x1', label: '5 fingers · tap', does: 'Play / pause', pack: EVERYDAY, run: (a, t) => a.playPause(t) },
+  { key: 'corner-top-right', label: 'Top-right corner', does: 'Spotlight', pack: EVERYDAY, run: (a, t) => a.spotlight(t) },
+  { key: 'corner-top-left', label: 'Top-left corner', does: 'Screenshot', pack: EVERYDAY, run: (a, t) => a.screenshot(t) },
+  { key: 'tap3x2', label: '3 fingers · double tap', does: 'Open or hide Claude', pack: CLAUDE, run: (a, t) => a.toggleClaude(t) },
+];
+// Chrome in front: the Browser pack's gestures take over, so the same tap does something else.
+const IN_CHROME = [
+  { key: 'tap4x1', label: '4 fingers · tap', does: 'Reopen closed tab', pack: BROWSER, run: (a, t) => a.reopenTab(t) },
+  { key: 'tap4x2', label: '4 fingers · double tap', does: 'Close tab', pack: BROWSER, run: (a) => a.front('chrome') },   // closes the reopened tab
+];
+const COUNT = ['', 'tap', 'double tap', 'triple tap'];
+
+function start(root) {
+  const screenCanvas = root.querySelector('.demo-screen canvas');
+  const pad = root.querySelector('.demo-pad');
+  const pill = root.querySelector('.demo-pill');
+  const cheat = root.querySelector('.demo-cheat');
+  const ring = root.querySelector('.demo-hold');
+  const screen = makeScreen(screenCanvas);
+  const water = makeWater(pad.querySelector('canvas'), { element: true, fingerRadius: 0.07 });
+  const now = () => performance.now() / 1000;
+  let front = 'finder';
+  let fingers = 4;
+
+  const bindings = () => (front === 'chrome' ? [...IN_CHROME, ...BINDINGS.filter((b) => !IN_CHROME.some((c) => c.key === b.key))] : BINDINGS);
+
+  // Cheat sheet: what each gesture does with the current app in front.
+  function renderCheat() {
+    cheat.innerHTML = '';
+    for (const b of bindings()) {
+      const li = document.createElement('li');
+      li.dataset.key = b.key;
+      li.innerHTML = `<span class="dot"></span><b></b><span class="does"></span>`;
+      li.querySelector('.dot').style.background = b.pack.dot === 'rainbow' ? 'var(--rainbow-x)' : b.pack.dot;
+      li.querySelector('b').textContent = b.label;
+      li.querySelector('.does').textContent = b.does;
+      cheat.append(li);
+    }
+  }
+  renderCheat();
+
+  let pillTimer = 0;
+  function say(textContent, pack, ok = true) {
+    pill.className = `demo-pill show${ok ? '' : ' hint'}`;
+    pill.querySelector('.dot').style.background = !pack ? 'transparent' : pack.dot === 'rainbow' ? 'var(--rainbow-x)' : pack.dot;
+    pill.querySelector('.text').textContent = textContent;
+    clearTimeout(pillTimer);
+    pillTimer = setTimeout(() => pill.classList.remove('show'), 2600);
+  }
+
+  const recognizer = makeRecognizer({
+    onHolding: (k) => { ring.style.setProperty('--k', k); ring.classList.toggle('on', k > 0); },
+    onGesture(g) {
+      const key = g.kind === 'corner' ? `corner-${g.corner}` : g.kind === 'hold' ? `hold${g.fingers}` : `tap${g.fingers}x${g.count}`;
+      const b = bindings().find((x) => x.key === key);
+      const what = g.kind === 'corner' ? `${g.corner.replace('-', ' ')} corner` : `${g.fingers} finger${g.fingers > 1 ? 's' : ''} · ${g.kind === 'hold' ? 'hold' : COUNT[g.count]}`;
+      if (!b) {
+        say(`${what}: not set up here. Try one from the list.`, null, false);
+        return;
+      }
+      b.run(screen.act, now());
+      say(`${what} → ${b.does}`, b.pack);
+      for (const li of cheat.children) li.classList.toggle('lit', li.dataset.key === key);
+      setTimeout(() => cheat.querySelector(`[data-key="${key}"]`)?.classList.remove('lit'), 1400);
+    },
+  });
+
+  // ---- Input. Real fingers on touch screens; on a Mac, the picked number of fingers at each click.
+  const rect = () => pad.getBoundingClientRect();
+  const toUV = (x, y) => { const r = rect(); return [Math.min(1, Math.max(0, (x - r.left) / r.width)), Math.min(1, Math.max(0, (y - r.top) / r.height))]; };
+  const corners = (uv) => {
+    const c = 0.15;
+    return (uv[0] < c || uv[0] > 1 - c) && (uv[1] < c || uv[1] > 1 - c);
+  };
+  // A click stands for several fingertips side by side, so the water shows them all.
+  const spread = ([u, v], n) => Array.from({ length: n }, (_, i) => [u + (i - (n - 1) / 2) * 0.075, v + Math.abs(i - (n - 1) / 2) * 0.03]);
+
+  let mouse = null;
+  pad.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'touch') return;          // touch screens use the touch events below
+    e.preventDefault();
+    pad.setPointerCapture(e.pointerId);
+    const uv = toUV(e.clientX, e.clientY);
+    const n = corners(uv) ? 1 : fingers;            // a click in a corner is a one-finger corner tap
+    mouse = { n };
+    const pts = spread(uv, n);
+    water.press(pts);
+    recognizer.update(pts);
+  });
+  pad.addEventListener('pointermove', (e) => {
+    if (!mouse || e.pointerType === 'touch') return;
+    const pts = spread(toUV(e.clientX, e.clientY), mouse.n);
+    water.press(pts);
+    recognizer.update(pts);
+  });
+  const up = (e) => {
+    if (!mouse || e.pointerType === 'touch') return;
+    const pts = spread(toUV(e.clientX, e.clientY), mouse.n);
+    mouse = null;
+    water.lift();
+    water.splash(pts);
+    recognizer.update([]);
+  };
+  pad.addEventListener('pointerup', up);
+  pad.addEventListener('pointercancel', up);
+
+  let lastTouch = [];
+  const touchPoints = (e) => [...e.touches].map((t) => toUV(t.clientX, t.clientY));
+  const onTouch = (e) => {
+    e.preventDefault();
+    const pts = touchPoints(e);
+    if (pts.length) { water.press(pts); lastTouch = pts; } else { water.lift(); water.splash(lastTouch); }
+    recognizer.update(pts);
+  };
+  for (const type of ['touchstart', 'touchmove', 'touchend', 'touchcancel']) pad.addEventListener(type, onTouch, { passive: false });
+
+  // Finger picker: buttons, or the keys 3, 4 and 5 while the demo is on screen.
+  const picker = root.querySelectorAll('.demo-fingers button');
+  const pick = (n) => {
+    fingers = n;
+    for (const b of picker) b.setAttribute('aria-pressed', String(Number(b.dataset.n) === n));
+  };
+  for (const b of picker) b.addEventListener('click', () => pick(Number(b.dataset.n)));
+  pick(4);
+  let inView = false;
+  addEventListener('keydown', (e) => {
+    if (!inView || e.metaKey || e.ctrlKey || e.altKey || /input|textarea/i.test(e.target.tagName)) return;
+    if (['3', '4', '5'].includes(e.key)) pick(Number(e.key));
+  });
+
+  // Front app: the same tap does different things in Finder and Chrome.
+  const apps = root.querySelectorAll('.demo-apps button');
+  for (const b of apps) b.addEventListener('click', () => {
+    front = b.dataset.app;
+    screen.act.front(front);
+    for (const x of apps) x.setAttribute('aria-pressed', String(x === b));
+    renderCheat();
+    say(front === 'chrome' ? 'Chrome is in front: its Browser pack takes over' : 'Finder is in front', front === 'chrome' ? BROWSER : EVERYDAY);
+  });
+
+  // Touch screens get real fingers, so the picker hides there.
+  if (matchMedia('(pointer: coarse)').matches) root.classList.add('touch');
+
+  // Draw the screen only while the demo is visible.
+  let running = false;
+  const frame = () => {
+    if (!inView) { running = false; return; }
+    screen.draw(now());
+    requestAnimationFrame(frame);
+  };
+  new IntersectionObserver(([e]) => {
+    inView = e.isIntersecting;
+    if (inView && !running) { running = true; requestAnimationFrame(frame); }
+  }).observe(root);
+  screen.ready.then(() => screen.draw(now()));
+}
+
+const root = document.querySelector('.demo');
+if (root) start(root);
