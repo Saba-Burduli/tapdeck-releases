@@ -25,18 +25,15 @@
       <div class="ctas reveal" style="--i:4"><a class="btn primary" href="buy.html">Buy</a><a class="more" href="#how">Try it in your browser</a></div>
     </section>
 
-    <!-- The MacBook from our 3D teaser, scrubbed by the scroll: the lid opens, fingers tap, windows move. -->
-    <section class="scrub" id="film" data-frames="132" data-wide="assets/frames/wide/" data-tall="assets/frames/tall/">
-      <div class="scrub-stage">
-        <canvas aria-label="A MacBook opening, then answering four-finger taps" role="img"></canvas>
-        <div class="scrub-caption" data-from="0.00" data-to="0.14"><h2>Meet TapDeck.</h2><p>Scroll to open.</p></div>
-        <div class="scrub-caption" data-from="0.20" data-to="0.40"><h2>The trackpad you already have.</h2><p>Now it knows how many fingers you tap with.</p></div>
-        <div class="scrub-caption" data-from="0.50" data-to="0.66"><h2>Four fingers. Snap left.</h2><span class="chip"><i></i>4 fingers · tap</span></div>
-        <div class="scrub-caption" data-from="0.72" data-to="0.86"><h2>Twice. Snap right.</h2><span class="chip"><i></i>4 fingers · double tap</span></div>
-        <div class="scrub-caption" data-from="0.90" data-to="1.01"><h2>Three times. Full screen.</h2><span class="chip"><i></i>4 fingers · triple tap</span></div>
-        <div class="scrub-progress" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+    <!-- The whole teaser, rendered live in 3D at the screen's own resolution; the scroll is its clock. -->
+    <section class="film" id="film" aria-label="The TapDeck film">
+      <div class="film-stage">
+        <div class="film-frame"><iframe title="The TapDeck film" tabindex="-1" aria-hidden="true"></iframe><img class="film-fallback" src="assets/poster.jpg" alt="A MacBook with TapDeck" hidden></div>
+        <nav class="film-chapters" aria-label="Film chapters"></nav>
+        <div class="film-bar" aria-hidden="true"><i></i></div>
       </div>
     </section>
+    <p class="film-skip"><a class="more" href="#how">Skip the film</a></p>
 
     <section id="how" class="section panel">
       <div class="wide-wrap">

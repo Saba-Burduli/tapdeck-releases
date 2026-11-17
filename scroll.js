@@ -1,6 +1,6 @@
-// Motion that follows the scroll, as on Apple's product pages: text and tiles rise in, the MacBook from our 3D teaser
-// is scrubbed frame by frame while its section stays pinned, numbers count up, and one dark band holds the app's water.
-// No libraries. With Reduce Motion everything simply appears and the MacBook shows its last frame.
+// Motion that follows the scroll, as on Apple's product pages: text and tiles rise in, the whole 3D teaser plays
+// live as you scroll while its stage stays pinned, numbers count up, and one dark band holds the app's water.
+// No libraries. With Reduce Motion everything simply appears and the film shows its end card.
 import { makeWater } from './water.js';
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -28,86 +28,91 @@ const counted = new IntersectionObserver((entries) => {
 }, { threshold: 0.6 });
 for (const el of document.querySelectorAll('[data-count]')) counted.observe(el);
 
-// ---- Scrub: the pinned MacBook. Progress through the section picks the frame and the caption.
-for (const section of document.querySelectorAll('.scrub')) scrub(section);
+// ---- The film: the teaser's own 3D scene, embedded and rendered live; scroll progress is the film's clock.
+const filmSection = document.querySelector('.film');
+if (filmSection) film(filmSection);
 
-function scrub(section) {
-  const canvas = section.querySelector('canvas');
-  const g = canvas.getContext('2d');
-  const captions = [...section.querySelectorAll('.scrub-caption')];
-  const dots = [...section.querySelectorAll('.scrub-progress i')];
-  const count = Number(section.dataset.frames);
-  const tall = () => innerWidth / innerHeight < 0.8;
-  let kind = tall() ? 'tall' : 'wide';
-  let frames = [];
-  let shown = -1, want = 0, raf = 0;
+function film(section) {
+  const stage = section.querySelector('.film-stage');
+  const frame = section.querySelector('.film-frame');
+  const iframe = frame.querySelector('iframe');
+  const fallback = frame.querySelector('.film-fallback');
+  const nav = section.querySelector('.film-chapters');
+  const bar = section.querySelector('.film-bar i');
+  const DURATION = 39;
+  // Each chapter lands just after its caption has settled (captions blur in over about half a second).
+  const CHAPTERS = [['Tap', 1.6], ['Claude', 3.5], ['Reveal', 5.6], ['Gestures', 9.9], ['Packs', 21.0], ['Same tap', 27.1], ['Values', 31.3], ['End', 36.5]];
+  let win = null, aspect = '', target = 0, shown = -1, current = 0, last = 0, raf = 0, onScreen = true;
 
-  // The stage size in device pixels, so frames draw sharp.
-  function fit() {
-    const r = canvas.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
-    canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
-    shown = -1;
+  // Chapter buttons scroll to their moment in the film.
+  const buttons = CHAPTERS.map(([label, t]) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.textContent = label;
+    b.addEventListener('click', () => scrollTo({ top: section.offsetTop + (section.offsetHeight - innerHeight) * (t / DURATION) + 1, behavior: reduce ? 'auto' : 'smooth' }));
+    nav.append(b);
+    return [b, t];
+  });
+
+  // Portrait screens get the film's 9:16 cut, everything else 16:9; either way it is scaled to fit, never cropped.
+  function layout() {
+    const want = stage.clientWidth / stage.clientHeight < 0.75 ? '9x16' : '16x9';
+    const [w, h] = want === '9x16' ? [1080, 1920] : [1920, 1080];
+    const scale = Math.min(stage.clientWidth / w, (stage.clientHeight - 64) / h);
+    frame.classList.toggle('tall', want === '9x16');
+    frame.style.transform = `translate(${(stage.clientWidth - w * scale) / 2}px, ${Math.max(0, (stage.clientHeight - 64 - h * scale) / 2)}px) scale(${scale})`;
+    // Sharpness: the film's pixels match the screen's, up to 4K (3840 px across a 16:9 stage).
+    const ratio = Math.min(2, Math.max(0.5, scale * (devicePixelRatio || 1)));
+    if (want !== aspect) {
+      aspect = want; win = null;
+      iframe.src = `film/index.html?aspect=${want}&bg=ffffff`;
+    }
+    frame.dataset.ratio = ratio;
+    if (win) { win.setPixelRatio(ratio); shown = -1; schedule(); }
   }
 
-  // Cover-fit a frame into the canvas, like object-fit: cover.
-  function paint(img) {
-    if (!img) return;
-    const cw = canvas.width, ch = canvas.height, iw = img.width, ih = img.height;
-    const k = Math.max(cw / iw, ch / ih), w = iw * k, h = ih * k;
-    g.fillStyle = '#fff'; g.fillRect(0, 0, cw, ch);
-    g.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
-  }
+  iframe.addEventListener('load', () => {
+    const w = iframe.contentWindow;
+    const wait = () => {
+      if (w.ready === true) { win = w; win.setPixelRatio(Number(frame.dataset.ratio)); shown = -1; current = target; schedule(); return; }
+      setTimeout(wait, 60);
+    };
+    wait();
+  });
+  // No WebGL2 (or the film failed): show a still instead.
+  setTimeout(() => { if (!win) { iframe.hidden = true; fallback.hidden = false; } }, 12000);
 
-  // Nearest loaded frame to the one we want, so scrubbing never shows a blank while frames stream in.
-  function draw() {
-    raf = 0;
-    if (want === shown) return;
-    let i = want;
-    for (let d = 0; d < count; d++) { if (frames[want - d]) { i = want - d; break; } if (frames[want + d]) { i = want + d; break; } }
-    if (!frames[i]) return;
-    paint(frames[i]);
-    shown = want === i ? i : -1;
+  function progress() {
+    const span = section.offsetHeight - innerHeight;
+    return reduce ? 1 : Math.min(1, Math.max(0, (scrollY - section.offsetTop) / Math.max(1, span)));
   }
-
-  function load(which) {
-    kind = which;
-    frames = new Array(count);
-    const base = section.dataset[which];
-    const pad = (n) => String(n).padStart(4, '0');
-    const get = (i) => new Promise((resolve) => {
-      const img = new Image();
-      img.decoding = 'async';
-      img.onload = () => { frames[i] = img; if (Math.abs(i - want) < 3 || shown < 0) schedule(); resolve(); };
-      img.onerror = resolve;
-      img.src = `${base}${pad(i + 1)}.webp`;
-    });
-    // First the frame on screen, then every 8th (a coarse pass), then the rest: smooth sooner.
-    const order = [Math.min(count - 1, want), 0];
-    for (let i = 0; i < count; i += 8) order.push(i);
-    for (let i = 0; i < count; i++) order.push(i);
-    const queue = [...new Set(order)];
-    let active = 0;
-    const next = () => { while (active < 6 && queue.length) { active++; get(queue.shift()).then(() => { active--; next(); }); } };
-    next();
-  }
-
-  function schedule() { if (!raf) raf = requestAnimationFrame(draw); }
 
   function onScroll() {
-    const r = section.getBoundingClientRect();
-    const span = section.offsetHeight - innerHeight;
-    const p = reduce ? 1 : Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
-    want = Math.round(p * (count - 1));
-    let active = -1;
-    captions.forEach((c, i) => { const on = p >= Number(c.dataset.from) && p < Number(c.dataset.to); c.classList.toggle('on', on); if (on) active = i; });
-    dots.forEach((d, i) => d.classList.toggle('on', i === active));
+    target = progress() * DURATION;
+    bar.style.transform = `scaleX(${target / DURATION})`;
+    let active = 0;
+    buttons.forEach(([, t], i) => { if (target + 0.05 >= (i ? CHAPTERS[i][1] - 0.4 : 0)) active = i; });
+    buttons.forEach(([b], i) => b.setAttribute('aria-current', String(i === active)));
     schedule();
   }
 
-  fit();
-  load(kind);
+  // The shown time follows the scroll with a short ease, so flicks and jumps play rather than step.
+  function tick(now) {
+    raf = 0;
+    if (!win || !onScreen) return;
+    const dt = Math.min(0.05, (now - (last || now)) / 1000);
+    last = now;
+    current += (target - current) * (1 - Math.exp(-dt / 0.12));
+    if (Math.abs(target - current) < 0.004) current = target;
+    const t = Math.round(current * 1000) / 1000;
+    if (t !== shown) { win.renderAt(t); shown = t; }
+    if (current !== target) schedule(); else last = 0;
+  }
+  function schedule() { if (!raf) raf = requestAnimationFrame(tick); }
+
+  new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; if (onScreen) schedule(); }).observe(section);
   addEventListener('scroll', onScroll, { passive: true });
-  addEventListener('resize', () => { fit(); const k = tall() ? 'tall' : 'wide'; if (k !== kind) load(k); onScroll(); });
+  addEventListener('resize', () => { layout(); onScroll(); });
+  layout();
   onScroll();
 }
 

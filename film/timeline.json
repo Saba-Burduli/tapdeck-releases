@@ -1,0 +1,112 @@
+{
+  "fps": 30,
+  "duration": 39,
+  "bpm": 100,
+  "scenes": [
+    { "id": "hook",     "start": 0,    "end": 2.4 },
+    { "id": "claude",   "start": 2.4,  "end": 4.8 },
+    { "id": "reveal",   "start": 4.8,  "end": 8.4 },
+    { "id": "montage",  "start": 8.4,  "end": 17.2 },
+    { "id": "packs",    "start": 17.2, "end": 25.6 },
+    { "id": "sametap",  "start": 25.6, "end": 30.4 },
+    { "id": "values",   "start": 30.4, "end": 33.6 },
+    { "id": "end",      "start": 33.6, "end": 39 }
+  ],
+
+  "contacts": [
+    { "t": 0.55,  "kind": "tap",    "n": 3, "at": [0.5, 0.55], "dur": 0.1 },
+    { "t": 0.79,  "kind": "tap",    "n": 3, "at": [0.5, 0.55], "dur": 0.1 },
+
+    { "t": 9.0,   "kind": "tap",    "n": 4, "at": [0.5, 0.5], "dur": 0.1 },
+    { "t": 10.8,  "kind": "tap",    "n": 4, "at": [0.52, 0.5], "dur": 0.09 },
+    { "t": 11.02, "kind": "tap",    "n": 4, "at": [0.52, 0.5], "dur": 0.09 },
+    { "t": 12.2,  "kind": "tap",    "n": 4, "at": [0.5, 0.48], "dur": 0.08 },
+    { "t": 12.4,  "kind": "tap",    "n": 4, "at": [0.5, 0.48], "dur": 0.08 },
+    { "t": 12.6,  "kind": "tap",    "n": 4, "at": [0.5, 0.48], "dur": 0.08 },
+    { "t": 13.4,  "kind": "hold",   "n": 3, "at": [0.48, 0.52], "dur": 1.0 },
+    { "t": 15.6,  "kind": "tap",    "n": 5, "at": [0.5, 0.5], "dur": 0.12 },
+    { "t": 16.4,  "kind": "corner", "n": 1, "at": [0.925, 0.1], "dur": 0.1 },
+
+    { "t": 26.2,  "kind": "tap",    "n": 4, "at": [0.5, 0.5], "dur": 0.11 },
+    { "t": 28.6,  "kind": "tap",    "n": 4, "at": [0.5, 0.5], "dur": 0.11 },
+
+    { "t": 30.7,  "kind": "tap",    "n": 1, "at": [0.3, 0.42], "dur": 0.1 },
+    { "t": 31.5,  "kind": "tap",    "n": 1, "at": [0.62, 0.55], "dur": 0.1 },
+    { "t": 32.3,  "kind": "tap",    "n": 1, "at": [0.45, 0.66], "dur": 0.1 }
+  ],
+
+  "lid": { "closed": 4.8, "open": [5.0, 7.4] },
+  "laptopHidden": [17.2, 25.6],
+
+  "screen": {
+    "claudeOpen": 2.5,
+    "claudeClose": 4.8,
+    "snapLeft": 9.15,
+    "snapRight": 11.15,
+    "fullScreen": 12.75,
+    "restore": 13.3,
+    "missionIn": 14.15,
+    "missionOut": 15.2,
+    "playPause": 15.72,
+    "spotlight": 16.5,
+    "spotlightText": "Simulator",
+    "spotlightOut": 17.25,
+    "sameFinder": 25.6,
+    "sameSnap": 26.35,
+    "sameCut": 28.0,
+    "reopenTab": 28.75
+  },
+
+  "packs": {
+    "rise": [17.3, 19.0],
+    "sink": [24.6, 25.6],
+    "on": {
+      "everyday-mac": 19.2,
+      "claude": 19.8,
+      "browser": 20.4,
+      "code-editors": 21.0,
+      "xcode": 21.6,
+      "terminal": 22.2
+    }
+  },
+
+  "captions": [
+    { "from": 0.9,  "to": 2.4,  "title": "Tap twice.", "style": "hero", "cut": true },
+    { "from": 2.75, "to": 4.8,  "title": "Claude opens.", "sub": "From any app.", "style": "side", "cut": true },
+    { "from": 6.3,  "to": 8.4,  "title": "Your trackpad", "sub": "is a shortcut panel.", "style": "right", "cut": true },
+    { "from": 9.15, "to": 10.75, "title": "Snap left.",     "gesture": "4 fingers · tap",        "pack": "everyday-mac", "style": "side" },
+    { "from": 11.15,"to": 12.15, "title": "Snap right.",    "gesture": "4 fingers · double tap", "pack": "everyday-mac", "style": "side" },
+    { "from": 12.75,"to": 13.35, "title": "Full screen.",   "gesture": "4 fingers · triple tap", "pack": "everyday-mac", "style": "side" },
+    { "from": 14.15,"to": 15.5,  "title": "Mission Control.", "gesture": "3 fingers · hold",     "pack": "everyday-mac", "style": "side" },
+    { "from": 15.72,"to": 16.35, "title": "Play.",          "gesture": "5 fingers · tap",        "pack": "everyday-mac", "style": "side" },
+    { "from": 16.5, "to": 17.2,  "title": "Spotlight.",     "gesture": "Top-right corner",       "pack": "everyday-mac", "style": "side", "cut": true },
+    { "from": 17.6, "to": 25.4,  "title": "Shortcut packs.", "sub": "Switch them on like plugins.", "style": "top" },
+    { "from": 26.35,"to": 28.0,  "title": "Same tap.",      "gesture": "4 fingers · tap in Finder", "pack": "everyday-mac", "style": "side", "cut": true },
+    { "from": 28.0, "to": 30.3,  "title": "Different app.", "gesture": "4 fingers · tap in Chrome", "pack": "browser", "style": "side", "cut": true }
+  ],
+
+  "values": [
+    { "t": 30.7, "text": "Just $9 a year." },
+    { "t": 31.5, "text": "Effortless." },
+    { "t": 32.3, "text": "Private." }
+  ],
+  "valuesSub": { "t": 32.6, "text": "No tracking · Runs entirely on your Mac" },
+
+  "end": {
+    "fade": [33.6, 34.0],
+    "icon": 34.0,
+    "title": 34.6,
+    "tagline": 35.05,
+    "launch": 35.6,
+    "repo": 36.2,
+    "star": 36.7
+  },
+
+  "music": {
+    "chords": [0, 8.4, 17.2, 25.6, 30.4, 34.0]
+  },
+  "whooshes": [2.4, 4.8, 8.4, 17.2, 25.6, 30.4, 33.6],
+  "plink": null,
+  "hit": 34.0,
+  "pulseFrom": 2.4
+}

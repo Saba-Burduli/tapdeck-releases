@@ -1,0 +1,294 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>TapDeck teaser</title>
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
+</script>
+<style>
+  :root { --bg: #ECE9E3; --card: #1D2027; --text: #17191D; --muted: rgba(23,25,29,0.6); --rim: rgba(255,255,255,0.16); --chip-text: #F2F3F5; --chip-muted: rgba(242,243,245,0.62); }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text);
+    font-family: -apple-system, "SF Pro Display", "Inter", "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
+  canvas#gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #ui { position: absolute; inset: 0; pointer-events: none; }
+
+  .cap { position: absolute; opacity: 0; }
+  .title, .sub, .value, .vsub { text-shadow: 0 0 18px rgba(236,233,227,0.95), 0 0 42px rgba(236,233,227,0.9), 0 0 80px rgba(236,233,227,0.8); }
+  .title { font-weight: 700; letter-spacing: -0.04em; line-height: 1.0; }
+  .sub { color: var(--muted); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; margin-top: 0.12em; }
+  .gesture { display: inline-flex; align-items: center; gap: 0.55em; margin-top: 1.1em; color: var(--muted); font-weight: 600; letter-spacing: -0.005em;
+    background: rgba(255,255,255,0.75); border: 1.5px solid rgba(23,25,29,0.08); border-radius: 999px; padding: 0.4em 0.95em 0.42em 0.75em;
+    box-shadow: 0 10px 30px rgba(27,34,48,0.10); backdrop-filter: blur(16px); }
+  .gesture .dot { width: 0.62em; height: 0.62em; border-radius: 50%; }
+  .cap.hero, .cap.top { text-align: center; }
+  .cap.right .title, .cap.right .sub { font-size: 96px !important; }
+
+  .values { position: absolute; opacity: 0; }
+  .value { font-weight: 800; letter-spacing: -0.05em; line-height: 1.0; opacity: 0; transform-origin: left center; white-space: nowrap; }
+  .vsub { color: var(--muted); font-weight: 500; margin-top: 1.2em; letter-spacing: -0.01em; opacity: 0; }
+
+  .end { position: absolute; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; opacity: 0; visibility: hidden; }
+  .icon-wrap { position: relative; }
+  .icon { display: block; filter: drop-shadow(0 30px 50px rgba(27,34,48,0.35)); }
+  .ring { position: absolute; left: 50%; top: 50%; border-radius: 50%; border: 3px solid rgba(23,25,29,0.25); opacity: 0; }
+  .name { font-weight: 800; letter-spacing: -0.045em; }
+  .tagline { color: var(--muted); font-weight: 500; letter-spacing: -0.015em; text-wrap: balance; }
+  .launch { font-weight: 800; letter-spacing: -0.03em;
+    background: linear-gradient(90deg, #61BB46 0 16.66%, #FDB827 16.66% 33.33%, #F5821F 33.33% 50%, #E03A3E 50% 66.66%, #963D97 66.66% 83.33%, #009DDC 83.33% 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .repo { color: var(--text); font-weight: 600; letter-spacing: -0.01em; }
+  .star { color: var(--muted); font-weight: 500; }
+
+  /* 16:9 */
+  body.w .cap.hero { left: 0; right: 0; bottom: 110px; }
+  body.w .cap.top { left: 0; right: 0; top: 96px; }
+  body.w .cap.side { left: 120px; top: 360px; width: 760px; }
+  body.w .cap.side .title, body.w .cap.side .sub { font-size: 100px; }
+  body.w .cap.right { right: 120px; top: 380px; width: 720px; text-align: right; }
+  body.w .title { font-size: 112px; }
+  body.w .sub { font-size: 112px; }
+  body.w .cap.top .title, body.w .cap.top .sub { font-size: 84px; }
+  body.w .gesture { font-size: 28px; }
+  body.w .values { left: 120px; top: 380px; width: 760px; }
+  body.w .value { font-size: 150px; }
+  body.w .vsub { font-size: 28px; width: 620px; line-height: 1.45; }
+  body.w .icon { width: 250px; height: 250px; } body.w .ring { width: 250px; height: 250px; }
+  body.w .name { font-size: 104px; margin-top: 34px; } body.w .tagline { font-size: 38px; margin-top: 8px; }
+  body.w .launch { font-size: 58px; margin-top: 44px; } body.w .repo { font-size: 32px; margin-top: 40px; } body.w .star { font-size: 27px; margin-top: 10px; }
+
+  /* 9:16: the subject in the upper part, text in the lower part. */
+  body.t .cap.hero, body.t .cap.top, body.t .cap.side, body.t .cap.right { left: 72px; right: 72px; top: 1240px; text-align: left; }
+  body.t .title, body.t .sub { font-size: 116px; }
+  body.t .cap.top .title, body.t .cap.top .sub { font-size: 96px; }
+  body.t .gesture { font-size: 34px; }
+  body.t .values { left: 72px; right: 72px; top: 1240px; }
+  body.t .value { font-size: 150px; }
+  body.t .vsub { font-size: 34px; line-height: 1.45; }
+  body.t .icon { width: 340px; height: 340px; } body.t .ring { width: 340px; height: 340px; }
+  body.t .name { font-size: 132px; margin-top: 50px; } body.t .tagline { font-size: 46px; margin-top: 12px; padding: 0 120px; }
+  body.t .launch { font-size: 72px; margin-top: 64px; } body.t .repo { font-size: 38px; margin-top: 60px; } body.t .star { font-size: 33px; margin-top: 14px; }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="ui"></div>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { clamp, smooth, sampleKeys, fingers, hover, easeOutCubic, easeInOutCubic } from './src/timeline.js';
+import { makeWater } from './src/water.js';
+import { makeLaptop, PAD } from './src/laptop.js';
+import { makeScreen } from './src/screen.js';
+import { makeCards } from './src/cards.js';
+import { makeOverlay } from './src/overlay.js';
+
+const params = new URLSearchParams(location.search);
+const tall = params.get('aspect') === '9x16';
+const W = tall ? 1080 : 1920, H = tall ? 1920 : 1080;
+document.body.classList.add(tall ? 't' : 'w');
+
+const tl = await (await fetch('./timeline.json')).json();
+
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gl'), antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(window.devicePixelRatio);   // 1 for 1080p, 2 for the 4K render
+renderer.setSize(W, H, false);
+renderer.toneMapping = THREE.NeutralToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+// A retro Apple set: warm platinum, fine grooves underfoot and the six-colour band curving behind.
+// `?bg=ffffff` sets the set's colour, e.g. white so frames blend into a white web page.
+const PLATINUM = params.get('bg') ? `#${params.get('bg').replace(/[^0-9a-f]/gi, '').slice(0, 6)}` : '#ECE9E3';
+document.documentElement.style.setProperty('--bg', PLATINUM);
+scene.background = new THREE.Color(PLATINUM);
+scene.fog = new THREE.Fog(PLATINUM, 140, 320);
+{
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 1024;
+  const g = c.getContext('2d'); g.fillStyle = PLATINUM === '#ECE9E3' ? '#EEEBE5' : PLATINUM; g.fillRect(0, 0, 1024, 1024);
+  for (let y = 0; y < 1024; y += 16) { g.fillStyle = 'rgba(120,112,100,0.05)'; g.fillRect(0, y, 1024, 3); }
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(8, 8); tex.anisotropy = 8;
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.85, metalness: 0 }));
+  ground.rotation.x = -Math.PI / 2; ground.position.y = -0.02; ground.receiveShadow = true; scene.add(ground);
+  // The rainbow band, in the order of the classic stripes.
+  const b = document.createElement('canvas'); b.width = 8; b.height = 600;
+  const bg = b.getContext('2d'); bg.fillStyle = PLATINUM; bg.fillRect(0, 0, 8, 600);
+  ['#61BB46', '#FDB827', '#F5821F', '#E03A3E', '#963D97', '#009DDC'].forEach((col, i) => { bg.fillStyle = col; bg.fillRect(0, 120 + i * 60, 8, 60); });
+  // Soften the stripes toward the platinum so the band sits back behind the product.
+  bg.globalAlpha = 0.38; bg.fillStyle = PLATINUM; bg.fillRect(0, 0, 8, 600); bg.globalAlpha = 1;
+  const bandTex = new THREE.CanvasTexture(b); bandTex.colorSpace = THREE.SRGBColorSpace;
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(170, 170, 30, 200, 1, true, Math.PI * 0.42, Math.PI * 1.16),
+    new THREE.MeshBasicMaterial({ map: bandTex, side: THREE.BackSide, toneMapped: false, fog: false }));
+  band.position.set(0, 9, 0);
+  scene.add(band);
+}
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.9;
+const key = new THREE.DirectionalLight('#ffffff', 1.6); key.position.set(-24, 70, 30); scene.add(key);
+key.castShadow = true; key.shadow.mapSize.set(4096, 4096); key.shadow.radius = 12; key.shadow.blurSamples = 24; key.shadow.bias = -0.0006;
+Object.assign(key.shadow.camera, { left: -32, right: 32, top: 32, bottom: -32, near: 20, far: 140 });
+
+const rim = new THREE.DirectionalLight('#cfd8ff', 1.1); rim.position.set(40, 25, -50); scene.add(rim);
+const fill = new THREE.DirectionalLight('#ffffff', 0.7); fill.position.set(50, 40, 45); scene.add(fill);
+
+const camera = new THREE.PerspectiveCamera(30, W / H, 0.5, 600);
+
+const water = makeWater(PAD.w / PAD.h);
+const screen = makeScreen();
+const laptop = makeLaptop({ screenTexture: screen.texture, padMaterial: water.material });
+scene.add(laptop.root);
+const cards = makeCards(tall);
+scene.add(cards.group);
+
+// The floor's soft shadow comes from the key light (VSM), so no painted shadow is needed.
+
+// Fingertips, as they would read on real glass: a soft shadow while a finger approaches,
+// then an oval contact patch with a pressure ring when it lands. They lie flat on the pad.
+const contactTex = (() => {
+  const c = document.createElement('canvas'); c.width = 128; c.height = 160;
+  const g = c.getContext('2d'); g.translate(64, 80); g.scale(1, 1.25);
+  const gr = g.createRadialGradient(0, 0, 0, 0, 0, 62);
+  gr.addColorStop(0, 'rgba(255,255,255,0.95)'); gr.addColorStop(0.55, 'rgba(255,255,255,0.85)'); gr.addColorStop(0.68, 'rgba(70,78,96,0.55)');
+  gr.addColorStop(0.8, 'rgba(70,78,96,0.18)'); gr.addColorStop(1, 'rgba(70,78,96,0)');
+  g.fillStyle = gr; g.beginPath(); g.arc(0, 0, 62, 0, Math.PI * 2); g.fill();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+const shadowTex = (() => {
+  const c = document.createElement('canvas'); c.width = 128; c.height = 160;
+  const g = c.getContext('2d'); g.translate(64, 80); g.scale(1, 1.25);
+  const gr = g.createRadialGradient(0, 0, 0, 0, 0, 62);
+  gr.addColorStop(0, 'rgba(30,36,50,0.55)'); gr.addColorStop(1, 'rgba(30,36,50,0)');
+  g.fillStyle = gr; g.beginPath(); g.arc(0, 0, 62, 0, Math.PI * 2); g.fill();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+const decal = (tex) => {
+  const geo = new THREE.PlaneGeometry(1, 1.25); geo.rotateX(-Math.PI / 2);
+  const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -4 }));
+  m.renderOrder = 10; m.visible = false; scene.add(m); return m;
+};
+const dots = Array.from({ length: 12 }, () => ({ contact: decal(contactTex), shadow: decal(shadowTex) }));
+
+// The falling drop at the start.
+const drop = new THREE.Mesh(new THREE.SphereGeometry(0.32, 32, 16),
+  new THREE.MeshPhysicalMaterial({ color: '#e8f1ff', roughness: 0.02, metalness: 0, clearcoat: 1, emissive: '#9fb7e6', emissiveIntensity: 0.35, envMapIntensity: 1.6 }));
+drop.scale.set(1, 1.35, 1);
+scene.add(drop);
+
+const overlay = makeOverlay(document.getElementById('ui'), tl);
+// `?clean=1`: no captions or end card, for using the film as a website background.
+if (params.get('clean')) document.getElementById('ui').style.display = 'none';
+
+// Camera keys: pos, target (cm), vertical fov, and how far the laptop is pushed aside for the text.
+const P = (x, y, z) => [x, y, z];
+// Each scene is one idea; a key pair a hundredth of a second apart is a hard cut.
+const U = P(0, 1, 0), DOWN = P(0, 0, -1);
+const keys16 = [
+  // Hook: macro on the trackpad.
+  { t: 0,     pos: P(0, 13, 16.5),   tgt: P(0, 1, 6.6),    fov: 32, sx: 0, sy: 0.1, up: U },
+  { t: 2.39,  pos: P(0, 11.5, 14.8), tgt: P(0, 1, 6.6),    fov: 32, sx: 0, sy: 0.1, up: U },
+  // Cut to the screen: Claude opens.
+  { t: 2.4,   pos: P(0, 23, 46),     tgt: P(0, 11.0, -12), fov: 30, sx: -0.23, sy: 0.04, up: U },
+  { t: 4.79,  pos: P(0, 22, 42),     tgt: P(0, 11.0, -12), fov: 30, sx: -0.23, sy: 0.04, up: U },
+  // Hero reveal: low and close as the lid opens, rising into a 3/4 view.
+  { t: 4.8,   pos: P(-6, 22, -34),   tgt: P(0, 1.5, -1),   fov: 30, sx: 0, sy: 0, up: U },
+  { t: 5.9,   pos: P(-16, 19, -32),  tgt: P(0, 3, -3),     fov: 30, sx: 0, sy: 0, up: U },
+  { t: 6.7,   pos: P(-54, 17, -2),   tgt: P(0, 5, -3),     fov: 30, sx: 0.08, sy: 0, up: U },
+  { t: 7.4,   pos: P(-38, 21, 52),   tgt: P(0, 6.5, -4),   fov: 30, sx: 0.17, sy: 0, up: U },
+  { t: 8.39,  pos: P(-39, 22, 54),   tgt: P(0, 6.5, -4),   fov: 30, sx: 0.17, sy: 0, up: U },
+  // Montage: one wide 3/4 view, laptop to the right of the words.
+  { t: 8.4,   pos: P(44, 32, 58),    tgt: P(0, 7, -4),     fov: 30, sx: -0.19, sy: 0, up: U },
+  { t: 17.19, pos: P(37, 28, 51),    tgt: P(0, 7, -4),     fov: 30, sx: -0.19, sy: 0, up: U },
+  // Packs: the cards alone in the white space.
+  { t: 17.2,  pos: P(0, 15, 46),     tgt: P(0, 15, 0),     fov: 30, sx: 0, sy: -0.07, up: U },
+  { t: 25.59, pos: P(0, 15, 38),     tgt: P(0, 15, 0),     fov: 30, sx: 0, sy: -0.07, up: U },
+  // Same tap, different app: one framing, cut in the middle.
+  { t: 25.6,  pos: P(0, 33, 53),     tgt: P(0, 8.5, -4.5), fov: 31, sx: -0.19, sy: 0, up: U },
+  { t: 30.39, pos: P(0, 31, 49),     tgt: P(0, 8.5, -4.5), fov: 31, sx: -0.19, sy: 0, up: U },
+  // Values: top-down on the pad.
+  { t: 30.4,  pos: P(0, 48, 8.7),    tgt: P(0, 1, 6.6),    fov: 26, sx: -0.21, sy: 0, up: DOWN },
+  { t: 34,    pos: P(0, 45, 8.6),    tgt: P(0, 1, 6.6),    fov: 26, sx: -0.21, sy: 0, up: DOWN },
+];
+// 9:16: the same shots, framed wider with the subject in the upper part.
+const far9 = (t) => t < 2.4 ? 1.15 : t < 4.8 ? 1.35 : t < 8.4 ? 1.5 : t < 17.2 ? 1.55 : t < 25.6 ? 1.75 : t < 30.4 ? 1.45 : 1.25;
+const keys9 = keys16.map((k) => {
+  const d = k.pos.map((v, i) => v - k.tgt[i]);
+  return { ...k, pos: k.tgt.map((v, i) => v + d[i] * far9(k.t)), fov: k.fov + 6, sx: 0, sy: k.t < 2.4 ? 0.12 : 0.17 };
+});
+const keys = tall ? keys9 : keys16;
+
+window.renderAt = (t) => {
+  const end = smooth(tl.end.fade[0], tl.end.fade[1], t);
+  overlay.update(t);
+  if (end >= 1) { renderer.setClearColor(PLATINUM); renderer.clear(); return; }
+
+  const k = sampleKeys(keys, t);
+  camera.fov = k.fov;
+  camera.position.set(...k.pos);
+  camera.up.set(...k.up).normalize();
+  camera.lookAt(...k.tgt);
+  camera.setViewOffset(W, H, k.sx * W, k.sy * H, W, H);
+  camera.updateProjectionMatrix();
+
+  // Darkness at the start: the laptop comes up as the camera pulls back.
+  renderer.toneMappingExposure = 1.0;
+  const fade = smooth(0, 0.25, t);
+  water.update(t, tl, { reveal: 1, fade, dark: false });
+  screen.draw(t, tl);
+  cards.update(t, tl);
+
+  drop.visible = false;
+  // The lid: closed at the start of the reveal, opening as the camera rises.
+  const [o0, o1] = tl.lid.open;
+  laptop.setLid(t >= tl.lid.closed && t < o1 ? 105 * easeInOutCubic(clamp((t - o0) / (o1 - o0))) : 105);
+  laptop.root.visible = !(t >= tl.laptopHidden[0] && t < tl.laptopHidden[1]);
+  // The logo lights up as the lid opens, like the classic PowerBooks.
+  laptop.setLogoGlow(t < tl.lid.closed ? 1 : smooth(tl.lid.closed + 0.15, o0 + 0.9, t));
+
+  // Fingertips.
+  let n = 0;
+  for (const c of tl.contacts) {
+    if (c.kind === 'drop') continue;
+    const { h, vis } = hover(c, t);
+    if (vis <= 0) continue;
+    for (const [u, v] of fingers(c)) {
+      if (n >= dots.length) break;
+      const d = dots[n++];
+      const size = 1.25 * (c.n === 1 ? 1.1 : 1);
+      // The shadow grows and softens with height; the contact patch appears only on touch.
+      d.shadow.visible = true;
+      d.shadow.position.copy(laptop.padPoint(u + h * 0.03, v + h * 0.05, 0.004));
+      d.shadow.scale.setScalar(size * (1 + h * 1.4));
+      d.shadow.material.opacity = vis * (0.35 + 0.5 * (1 - h));
+      const touch = 1 - clamp(h * 4);
+      d.contact.visible = touch > 0.01;
+      d.contact.position.copy(laptop.padPoint(u, v, 0.006));
+      d.contact.scale.setScalar(size * (0.85 + 0.15 * touch));
+      d.contact.material.opacity = vis * touch * 0.9;
+    }
+  }
+  for (; n < dots.length; n++) { dots[n].contact.visible = false; dots[n].shadow.visible = false; }
+
+  renderer.render(scene, camera);
+};
+
+await document.fonts.ready;
+await screen.ready;
+await cards.ready;
+await new Promise((r) => { const img = document.querySelector('.icon'); img.complete ? r() : (img.onload = r, img.onerror = r); });
+// For a page that embeds the film and drives it by scroll: it sets the sharpness (device pixels per CSS pixel,
+// e.g. 2 for a 3840 px wide 16:9 stage) and calls renderAt(t) as the visitor scrolls.
+window.setPixelRatio = (ratio) => {
+  if (Math.abs(ratio - renderer.getPixelRatio()) < 0.01) return;
+  renderer.setPixelRatio(ratio);
+  renderer.setSize(W, H, false);
+};
+window.renderAt(0);
+window.ready = true;
+</script>
+</body>
+</html>

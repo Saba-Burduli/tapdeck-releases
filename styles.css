@@ -86,28 +86,22 @@ section { position: relative; }
 .hero .price { font: 400 21px/1.38 var(--display); margin-top: 18px; color: var(--ink); }
 .hero .price span { color: var(--ink-2); }
 
-/* Scroll-scrubbed MacBook: a tall section whose canvas stays in view while the frames follow the scroll. */
-.scrub { height: 480vh; }
-.scrub-stage { position: sticky; top: 52px; height: calc(100vh - 52px); overflow: hidden; display: grid; place-items: center; }
-.scrub-stage canvas { width: 100%; height: 100%; object-fit: cover; }
-.scrub-caption { position: absolute; left: 0; right: 0; bottom: 9vh; text-align: center; pointer-events: none; padding: 0 22px;
-  opacity: 0; transform: translateY(16px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
-.scrub-caption.on { opacity: 1; transform: none; }
-.scrub-caption h2 { font-size: clamp(32px, 4.6vw, 48px); line-height: 1.08; }
-.scrub-caption p { margin: 8px 0 0; font: 600 clamp(17px, 2vw, 21px)/1.3 var(--display); color: var(--ink-2); }
-.scrub-caption .chip { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 7px 14px; border-radius: 980px; background: rgba(245,245,247,0.92);
-  font: 600 14px/1 var(--text); color: var(--ink); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.scrub-caption .chip i { width: 9px; height: 9px; border-radius: 50%; background: var(--rainbow); }
-/* Wide screens: captions in the frames' empty left side, as in the film. Portrait screens: under the laptop. */
-@media (min-aspect-ratio: 4/5) {
-  .scrub-caption { left: 7vw; right: auto; bottom: auto; top: 50%; max-width: min(36vw, 520px); text-align: left; padding: 0;
-    transform: translateY(calc(-50% + 16px)); }
-  .scrub-caption.on { transform: translateY(-50%); }
-  .scrub-caption h2, .scrub-caption p { text-shadow: 0 0 24px #fff, 0 0 48px #fff; }
-}
-.scrub-progress { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); display: grid; gap: 8px; }
-.scrub-progress i { width: 6px; height: 6px; border-radius: 50%; background: #d2d2d7; transition: background .3s, transform .3s; }
-.scrub-progress i.on { background: var(--ink); transform: scale(1.3); }
+/* The film: the teaser's live 3D scene on a pinned stage. It keeps its proportions and always fits the window. */
+.film { height: 1500vh; }
+.film-stage { position: sticky; top: 52px; height: calc(100vh - 52px); overflow: hidden; background: #fff; }
+.film-frame { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.film-frame iframe { display: block; border: 0; width: 1920px; height: 1080px; pointer-events: none; background: #fff; }
+.film-frame.tall iframe { width: 1080px; height: 1920px; }
+.film-fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+[hidden] { display: none !important; }
+.film-chapters { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; gap: 4px; padding: 5px; border-radius: 980px;
+  background: rgba(245,245,247,0.86); backdrop-filter: saturate(1.8) blur(20px); -webkit-backdrop-filter: saturate(1.8) blur(20px); max-width: calc(100% - 32px); overflow-x: auto; scrollbar-width: none; }
+.film-chapters button { font: 400 12px/1 var(--text); letter-spacing: -0.01em; color: var(--ink-2); background: transparent; border: 0; border-radius: 980px; padding: 7px 12px; cursor: pointer; white-space: nowrap; transition: background .25s var(--ease), color .25s var(--ease); }
+.film-chapters button[aria-current="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+.film-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(0,0,0,0.06); }
+.film-bar i { display: block; height: 100%; width: 100%; transform-origin: 0 0; transform: scaleX(0); background: var(--ink); }
+.film-skip { text-align: center; margin: 18px 0 0; font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { .film { height: auto; } .film-stage { position: relative; top: 0; height: min(80vh, 760px); } .film-chapters { display: none; } }
 
 /* Try it: the interactive demo, on a light panel. */
 .demo { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr); gap: 32px; align-items: start; }
