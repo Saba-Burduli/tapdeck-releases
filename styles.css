@@ -96,6 +96,12 @@ section { position: relative; }
 .film-frame.tall iframe { width: 1080px; height: 1920px; }
 .film-fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
 [hidden] { display: none !important; }
+/* The still (no 3D, or a failed film): one screen, no scrubbing, no chapters. */
+.film.still { height: auto; }
+.film.still .film-stage { position: relative; top: 0; height: min(80vh, 760px); }
+.film.still .film-chapters, .film.still .film-bar { display: none; }
+.film.still .film-frame { inset: 0; transform: none !important; }
+.film.still + .film-skip { display: none; }
 .film-chapters { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; gap: 4px; padding: 5px; border-radius: 980px;
   background: rgba(245,245,247,0.86); backdrop-filter: saturate(1.8) blur(20px); -webkit-backdrop-filter: saturate(1.8) blur(20px); max-width: calc(100% - 32px); overflow-x: auto; scrollbar-width: none; }
 .film-chapters button { font: 400 12px/1 var(--text); letter-spacing: -0.01em; color: var(--ink-2); background: transparent; border: 0; border-radius: 980px; padding: 7px 12px; cursor: pointer; white-space: nowrap; transition: background .25s var(--ease), color .25s var(--ease); }

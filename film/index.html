@@ -94,7 +94,18 @@ document.body.classList.add(tall ? 't' : 'w');
 
 const tl = await (await fetch('./timeline.json')).json();
 
-const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gl'), antialias: true, preserveDrawingBuffer: true });
+// `?bg=ffffff` sets the set's colour, e.g. white so frames blend into a white web page. Set before anything can fail.
+const PLATINUM = params.get('bg') ? `#${params.get('bg').replace(/[^0-9a-f]/gi, '').slice(0, 6)}` : '#ECE9E3';
+document.documentElement.style.setProperty('--bg', PLATINUM);
+
+// No WebGL2 (graphics acceleration off, a blocklisted GPU): tell the embedding page so it shows a still at once.
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gl'), antialias: true, preserveDrawingBuffer: true });
+} catch (e) {
+  window.failed = true;
+  throw e;
+}
 renderer.setPixelRatio(window.devicePixelRatio);   // 1 for 1080p, 2 for the 4K render
 renderer.setSize(W, H, false);
 renderer.toneMapping = THREE.NeutralToneMapping;
@@ -104,9 +115,6 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
 // A retro Apple set: warm platinum, fine grooves underfoot and the six-colour band curving behind.
-// `?bg=ffffff` sets the set's colour, e.g. white so frames blend into a white web page.
-const PLATINUM = params.get('bg') ? `#${params.get('bg').replace(/[^0-9a-f]/gi, '').slice(0, 6)}` : '#ECE9E3';
-document.documentElement.style.setProperty('--bg', PLATINUM);
 scene.background = new THREE.Color(PLATINUM);
 scene.fog = new THREE.Fog(PLATINUM, 140, 320);
 {

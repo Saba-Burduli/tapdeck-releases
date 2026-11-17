@@ -1,7 +1,17 @@
 // Motion that follows the scroll, as on Apple's product pages: text and tiles rise in, the whole 3D teaser plays
 // live as you scroll while its stage stays pinned, numbers count up, and one dark band holds the app's water.
 // No libraries. With Reduce Motion everything simply appears and the film shows its end card.
-import { makeWater } from './water.js';
+import { makeWater } from './water.js?v=20261117c';
+
+// WebGL2 is what the film, the Try it trackpad's water and the water band need. Browsers with graphics acceleration
+// turned off (or a blocklisted GPU) don't have it; they get a still picture straight away instead of a blank box.
+export const has3D = (() => {
+  try {
+    const gl = document.createElement('canvas').getContext('webgl2');
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    return !!gl;
+  } catch { return false; }
+})();
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const ease = (k) => 1 - Math.pow(1 - k, 3);
@@ -64,16 +74,29 @@ function film(section) {
     const ratio = Math.min(2, Math.max(0.5, scale * (devicePixelRatio || 1)));
     if (started && want !== aspect) {
       aspect = want; win = null;
-      iframe.src = `film/index.html?aspect=${want}&bg=ffffff`;
+      iframe.src = `film/index.html?aspect=${want}&bg=ffffff&v=20261117c`;
     }
     frame.dataset.ratio = ratio;
     if (win) { win.setPixelRatio(ratio); shown = -1; schedule(); }
   }
 
+  // The still: for browsers without 3D, a film that failed, or one still loading after 12 s on a very slow line.
+  // The section stops being a long scroll then, since there is nothing to scrub.
+  function showStill() {
+    if (!fallback.src) fallback.src = fallback.dataset.src;
+    iframe.hidden = true; fallback.hidden = false;
+    section.classList.add('still');
+  }
+  function showFilm() {
+    iframe.hidden = false; fallback.hidden = true;
+    section.classList.remove('still');
+  }
+
   iframe.addEventListener('load', () => {
     const w = iframe.contentWindow;
     const wait = () => {
-      if (w.ready === true) { win = w; win.setPixelRatio(Number(frame.dataset.ratio)); shown = -1; current = target; schedule(); return; }
+      if (w.failed) { showStill(); return; }
+      if (w.ready === true) { win = w; showFilm(); win.setPixelRatio(Number(frame.dataset.ratio)); shown = -1; current = target; schedule(); return; }
       setTimeout(wait, 60);
     };
     wait();
@@ -85,10 +108,12 @@ function film(section) {
     if (started) return;
     started = true;
     near.disconnect();
+    if (!has3D) { showStill(); return; }
     layout();
     // No WebGL2 (or the film failed): show a still instead.
     // Its src is set only now, so visitors whose film plays never download the still.
-    setTimeout(() => { if (!win) { fallback.src = fallback.dataset.src; iframe.hidden = true; fallback.hidden = false; } }, 12000);
+    // If the film turns up later after all, it takes over again (see showFilm above).
+    setTimeout(() => { if (!win) showStill(); }, 12000);
   }
   const near = new IntersectionObserver(([e]) => { if (e.isIntersecting) begin(); }, { rootMargin: '100% 0px' });
   near.observe(stage);
@@ -140,6 +165,7 @@ if (pool) {
 
 function pond(pool) {
   const water = makeWater(pool.querySelector('canvas'), { element: true, autoDrops: true, fingerRadius: 0.045, dark: true });
+  if (!water) pool.querySelector('span').textContent = 'Turn on graphics acceleration in your browser to see the water.';
   if (water) {
     let lift = 0;
     const uv = (e) => { const r = pool.getBoundingClientRect(); return [(e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height]; };

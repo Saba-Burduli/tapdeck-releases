@@ -1,9 +1,9 @@
 // "Try it": a virtual MacBook that answers TapDeck's gestures. The screen is the teaser's macOS desktop; the
 // trackpad is the app's water. Phones and iPads use real fingers. On a Mac the browser never sees multi-finger
 // trackpad taps (macOS keeps them), so visitors pick how many fingers and click.
-import { makeScreen } from './screen.js';
-import { makeRecognizer, RULES, MOUSE_RULES } from './recognizer.js';
-import { makeWater } from '../water.js';
+import { makeScreen } from './screen.js?v=20261117c';
+import { makeRecognizer, RULES, MOUSE_RULES } from './recognizer.js?v=20261117c';
+import { makeWater } from '../water.js?v=20261117c';
 
 
 // The app's default packs (Sources/Config/Packs.swift). App packs win while their app is in front.
@@ -40,7 +40,8 @@ function start(root) {
   const ensure = () => {
     if (screen) return;
     screen = makeScreen(screenCanvas);
-    water = makeWater(pad.querySelector('canvas'), { element: true, fingerRadius: 0.07, dark: false });
+    // Without WebGL2 there's no water, but the gestures still work.
+    water = makeWater(pad.querySelector('canvas'), { element: true, fingerRadius: 0.07, dark: false }) || { press() {}, lift() {}, splash() {} };
     screen.act.front(front);
     screen.ready.then(() => screen.draw(now()));
   };
