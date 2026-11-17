@@ -6,6 +6,8 @@
 <script type="importmap">
 { "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
 </script>
+<!-- laptop.js imports this only after it arrives itself; fetch it alongside the first wave of modules instead. -->
+<link rel="modulepreload" href="./vendor/three/addons/geometries/RoundedBoxGeometry.js">
 <style>
   :root { --bg: #ECE9E3; --card: #1D2027; --text: #17191D; --muted: rgba(23,25,29,0.6); --rim: rgba(255,255,255,0.16); --chip-text: #F2F3F5; --chip-muted: rgba(242,243,245,0.62); }
   * { box-sizing: border-box; margin: 0; }

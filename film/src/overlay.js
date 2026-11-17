@@ -7,7 +7,7 @@ export function makeOverlay(root, tl) {
     <div class="cap"><div class="title"></div><div class="sub"></div><div class="gesture"><span class="dot"></span><span class="gtext"></span></div></div>
     <div class="values"><div class="value"></div><div class="vsub"></div></div>
     <div class="end">
-      <div class="icon-wrap"><div class="ring"></div><div class="ring"></div><div class="ring"></div><img class="icon" src="out/icon-1024.png"></div>
+      <div class="icon-wrap"><div class="ring"></div><div class="ring"></div><div class="ring"></div><img class="icon" src="out/icon-680.webp"></div>
       <div class="name">TapDeck</div>
       <div class="tagline">Your MacBook trackpad, as a shortcut panel.</div>
       <div class="launch">Coming November 17</div>

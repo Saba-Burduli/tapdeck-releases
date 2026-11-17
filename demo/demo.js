@@ -34,8 +34,18 @@ function start(root) {
   const pill = root.querySelector('.demo-pill');
   const cheat = root.querySelector('.demo-cheat');
   const ring = root.querySelector('.demo-hold');
-  const screen = makeScreen(screenCanvas);
-  const water = makeWater(pad.querySelector('canvas'), { element: true, fingerRadius: 0.07, dark: false });
+  // The 2048 px screen, its Dock icons and the pad's WebGL water are made the first time the demo comes within a
+  // viewport of the screen (or is touched), not at page load; until then nothing here needs them.
+  let screen = null, water = null;
+  const ensure = () => {
+    if (screen) return;
+    screen = makeScreen(screenCanvas);
+    water = makeWater(pad.querySelector('canvas'), { element: true, fingerRadius: 0.07, dark: false });
+    screen.act.front(front);
+    screen.ready.then(() => screen.draw(now()));
+  };
+  const near = new IntersectionObserver(([e]) => { if (e.isIntersecting) { near.disconnect(); ensure(); } }, { rootMargin: '100% 0px' });
+  near.observe(root);
   const now = () => performance.now() / 1000;
   let front = 'finder';
   let fingers = 4;
@@ -110,6 +120,7 @@ function start(root) {
 
   let mouse = null;
   pad.addEventListener('pointerdown', (e) => {
+    ensure();
     if (e.pointerType === 'touch') return;          // touch screens use the touch events below
     if (e.button !== 0) return;                     // right and middle clicks aren't taps
     e.preventDefault();
@@ -142,6 +153,7 @@ function start(root) {
   let lastTouch = [];
   const touchPoints = (e) => [...e.touches].map((t) => toUV(t.clientX, t.clientY));
   const onTouch = (e) => {
+    ensure();
     e.preventDefault();
     const pts = touchPoints(e);
     if (pts.length) { water.press(pts); lastTouch = pts; } else { water.lift(); water.splash(lastTouch); }
@@ -167,6 +179,7 @@ function start(root) {
   const apps = root.querySelectorAll('.demo-apps button');
   for (const b of apps) b.addEventListener('click', () => {
     front = b.dataset.app;
+    ensure();
     screen.act.front(front);
     for (const x of apps) x.setAttribute('aria-pressed', String(x === b));
     renderCheat();
@@ -180,6 +193,7 @@ function start(root) {
   let running = false;
   const frame = () => {
     if (!inView) { running = false; return; }
+    ensure();
     screen.draw(now());
     requestAnimationFrame(frame);
   };
@@ -187,7 +201,6 @@ function start(root) {
     inView = e.isIntersecting;
     if (inView && !running) { running = true; requestAnimationFrame(frame); }
   }).observe(root);
-  screen.ready.then(() => screen.draw(now()));
 }
 
 const root = document.querySelector('.demo');

@@ -42,7 +42,7 @@ function film(section) {
   const DURATION = 39;
   // Each chapter lands just after its caption has settled (captions blur in over about half a second).
   const CHAPTERS = [['Tap', 1.6], ['Claude', 3.5], ['Reveal', 5.6], ['Gestures', 9.9], ['Packs', 21.0], ['Same tap', 27.1], ['Values', 31.3], ['End', 36.5]];
-  let win = null, aspect = '', target = 0, shown = -1, current = 0, last = 0, raf = 0, onScreen = true;
+  let win = null, aspect = '', target = 0, shown = -1, current = 0, last = 0, raf = 0, onScreen = true, started = false;
 
   // Chapter buttons scroll to their moment in the film.
   const buttons = CHAPTERS.map(([label, t]) => {
@@ -62,7 +62,7 @@ function film(section) {
     frame.style.transform = `translate(${(stage.clientWidth - w * scale) / 2}px, ${Math.max(0, (stage.clientHeight - 64 - h * scale) / 2)}px) scale(${scale})`;
     // Sharpness: the film's pixels match the screen's, up to 4K (3840 px across a 16:9 stage).
     const ratio = Math.min(2, Math.max(0.5, scale * (devicePixelRatio || 1)));
-    if (want !== aspect) {
+    if (started && want !== aspect) {
       aspect = want; win = null;
       iframe.src = `film/index.html?aspect=${want}&bg=ffffff`;
     }
@@ -78,8 +78,22 @@ function film(section) {
     };
     wait();
   });
-  // No WebGL2 (or the film failed): show a still instead.
-  setTimeout(() => { if (!win) { iframe.hidden = true; fallback.hidden = false; } }, 12000);
+  // The film (three.js and its textures) is the page's heaviest part, so it never competes with the first paint:
+  // it starts once the page has loaded and gone idle, or as soon as its stage nears the screen (an IntersectionObserver
+  // reports only after a frame has painted), whichever comes first. Until it is ready the stage is plain white.
+  function begin() {
+    if (started) return;
+    started = true;
+    near.disconnect();
+    layout();
+    // No WebGL2 (or the film failed): show a still instead.
+    // Its src is set only now, so visitors whose film plays never download the still.
+    setTimeout(() => { if (!win) { fallback.src = fallback.dataset.src; iframe.hidden = true; fallback.hidden = false; } }, 12000);
+  }
+  const near = new IntersectionObserver(([e]) => { if (e.isIntersecting) begin(); }, { rootMargin: '100% 0px' });
+  near.observe(stage);
+  const idle = () => (window.requestIdleCallback ? requestIdleCallback(begin, { timeout: 500 }) : setTimeout(begin, 200));
+  if (document.readyState === 'complete') idle(); else addEventListener('load', idle, { once: true });
 
   function progress() {
     const span = section.offsetHeight - innerHeight;
@@ -117,8 +131,14 @@ function film(section) {
 }
 
 // ---- The water moment: the app's water in a dark band, following the pointer like a fingertip.
+// Its WebGL context is made the first time the band comes within a viewport of the screen, not at page load.
 const pool = document.querySelector('.water-moment .pool');
 if (pool) {
+  const near = new IntersectionObserver(([e]) => { if (e.isIntersecting) { near.disconnect(); pond(pool); } }, { rootMargin: '100% 0px' });
+  near.observe(pool);
+}
+
+function pond(pool) {
   const water = makeWater(pool.querySelector('canvas'), { element: true, autoDrops: true, fingerRadius: 0.045, dark: true });
   if (water) {
     let lift = 0;

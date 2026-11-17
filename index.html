@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
   <title>TapDeck: your MacBook trackpad, as a shortcut panel</title>
   <meta name="description" content="TapDeck turns quick multi-finger taps on your Mac's trackpad into shortcuts: snap windows, open Claude, control media and more. $9 a year.">
   <meta property="og:title" content="TapDeck">
@@ -13,22 +14,22 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="globalnav"><div class="wrap"><a class="mark" href="./"><img src="assets/icon.png" alt="">TapDeck</a><nav><a href="#how">Try it</a><a href="#packs">Packs</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav></div></div>
+  <div class="globalnav"><div class="wrap"><a class="mark" href="./"><img src="assets/icon-64.webp" alt="" width="20" height="20">TapDeck</a><nav><a href="#how">Try it</a><a href="#packs">Packs</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav></div></div>
   <div class="localnav"><div class="wrap"><a class="title" href="./">TapDeck</a><nav><a href="#film">Overview</a><a href="#how">Try it</a><a href="#packs">Packs</a><a class="btn primary small" href="buy.html">Buy</a></nav></div></div>
 
   <main>
     <section class="hero wrap">
-      <img class="icon reveal" src="assets/icon.png" alt="TapDeck icon">
-      <p class="eyebrow rainbow reveal" style="--i:1">TapDeck</p>
-      <h1 class="reveal" style="--i:2">Your trackpad.<br>Now a shortcut panel.</h1>
-      <p class="price reveal" style="--i:3">Just $9 a year. <span>For up to 3 Macs.</span></p>
-      <div class="ctas reveal" style="--i:4"><a class="btn primary" href="buy.html">Buy</a><a class="more" href="#how">Try it in your browser</a></div>
+      <img class="icon rise" src="assets/icon-256.webp" alt="TapDeck icon" width="96" height="96" fetchpriority="high">
+      <p class="eyebrow rainbow rise" style="--i:1">TapDeck</p>
+      <h1 class="rise" style="--i:2">Your trackpad.<br>Now a shortcut panel.</h1>
+      <p class="price rise" style="--i:3">Just $9 a year. <span>For up to 3 Macs.</span></p>
+      <div class="ctas rise" style="--i:4"><a class="btn primary" href="buy.html">Buy</a><a class="more" href="#how">Try it in your browser</a></div>
     </section>
 
     <!-- The whole teaser, rendered live in 3D at the screen's own resolution; the scroll is its clock. -->
     <section class="film" id="film" aria-label="The TapDeck film">
       <div class="film-stage">
-        <div class="film-frame"><iframe title="The TapDeck film" tabindex="-1" aria-hidden="true"></iframe><img class="film-fallback" src="assets/poster.jpg" alt="A MacBook with TapDeck" hidden></div>
+        <div class="film-frame"><iframe title="The TapDeck film" tabindex="-1" aria-hidden="true"></iframe><img class="film-fallback" data-src="assets/poster.webp" alt="A MacBook with TapDeck" width="1600" height="900" hidden></div>
         <nav class="film-chapters" aria-label="Film chapters"></nav>
         <div class="film-bar" aria-hidden="true"><i></i></div>
       </div>
@@ -50,8 +51,8 @@
           <div class="demo-side">
             <div class="demo-apps" role="group" aria-label="App in front">
               <span>In front</span>
-              <button type="button" data-app="finder" aria-pressed="true"><img src="assets/icons/finder.png" alt="">Finder</button>
-              <button type="button" data-app="chrome" aria-pressed="false"><img src="assets/icons/chrome.png" alt="">Chrome</button>
+              <button type="button" data-app="finder" aria-pressed="true"><img src="assets/icons/finder.webp" alt="" width="18" height="18" loading="lazy" decoding="async">Finder</button>
+              <button type="button" data-app="chrome" aria-pressed="false"><img src="assets/icons/chrome.webp" alt="" width="18" height="18" loading="lazy" decoding="async">Chrome</button>
             </div>
             <div class="demo-pad" aria-label="Trackpad: tap here">
               <canvas aria-hidden="true"></canvas>
@@ -79,13 +80,13 @@
           <p class="lede reveal" style="--i:2">App packs work only while their app is in front, so one tap does the right thing everywhere.</p>
         </div>
         <div class="tiles">
-          <div class="tile reveal"><img class="app" src="assets/icon.png" alt=""><h3>Everyday Mac</h3><p>Windows, Mission Control, Spotlight and media, in every app.</p><div class="gesture"><span><b>4 fingers · tap</b>Snap left</span><span><b>Top-right corner</b>Spotlight</span></div></div>
-          <div class="tile reveal" style="--i:1"><img class="app" src="assets/icons/claude.png" alt=""><h3>Claude</h3><p>Open Claude from anywhere; new chat and stop while you're in it.</p><div class="gesture"><span><b>3 fingers · double tap</b>Open Claude</span><span><b>4 fingers · tap</b>Stop</span></div></div>
-          <div class="tile reveal" style="--i:2"><img class="app" src="assets/icons/dia.png" alt=""><h3>Browser</h3><p>Tabs, private windows, refresh and DevTools in six browsers.</p><div class="gesture"><span><b>4 fingers · tap</b>Reopen tab</span><span><b>3 fingers · hold</b>Refresh</span></div></div>
-          <div class="tile reveal"><img class="app" src="assets/icons/zed.png" alt=""><h3>Code Editors</h3><p>Command palette, quick open and AI suggestions in 15 editors.</p><div class="gesture"><span><b>3 fingers · tap</b>Command palette</span><span><b>4 fingers · tap</b>Accept suggestion</span></div></div>
-          <div class="tile reveal" style="--i:1"><img class="app" src="assets/icons/xcode.png" alt=""><h3>Xcode &amp; Simulator</h3><p>Run, stop and build; bring up the Simulator from anywhere.</p><div class="gesture"><span><b>3 fingers · triple tap</b>Run</span><span><b>4 fingers · hold</b>Simulator</span></div></div>
-          <div class="tile reveal" style="--i:2"><img class="app" src="assets/icons/ghostty.png" alt=""><h3>Terminal</h3><p>New tab, interrupt and clear in Ghostty, Terminal, iTerm2 and Warp.</p><div class="gesture"><span><b>4 fingers · tap</b>Interrupt</span><span><b>3 fingers · hold</b>Clear</span></div></div>
-          <div class="tile showcase reveal"><img src="assets/packs.jpg" alt="TapDeck's six shortcut packs in Settings, switched on" loading="lazy"></div>
+          <div class="tile reveal"><img class="app" src="assets/icon-256.webp" alt="" width="64" height="64" loading="lazy" decoding="async"><h3>Everyday Mac</h3><p>Windows, Mission Control, Spotlight and media, in every app.</p><div class="gesture"><span><b>4 fingers · tap</b>Snap left</span><span><b>Top-right corner</b>Spotlight</span></div></div>
+          <div class="tile reveal" style="--i:1"><img class="app" src="assets/icons/claude.webp" alt="" width="64" height="64" loading="lazy" decoding="async"><h3>Claude</h3><p>Open Claude from anywhere; new chat and stop while you're in it.</p><div class="gesture"><span><b>3 fingers · double tap</b>Open Claude</span><span><b>4 fingers · tap</b>Stop</span></div></div>
+          <div class="tile reveal" style="--i:2"><img class="app" src="assets/icons/dia.webp" alt="" width="64" height="64" loading="lazy" decoding="async"><h3>Browser</h3><p>Tabs, private windows, refresh and DevTools in six browsers.</p><div class="gesture"><span><b>4 fingers · tap</b>Reopen tab</span><span><b>3 fingers · hold</b>Refresh</span></div></div>
+          <div class="tile reveal"><img class="app" src="assets/icons/zed.webp" alt="" width="64" height="64" loading="lazy" decoding="async"><h3>Code Editors</h3><p>Command palette, quick open and AI suggestions in 15 editors.</p><div class="gesture"><span><b>3 fingers · tap</b>Command palette</span><span><b>4 fingers · tap</b>Accept suggestion</span></div></div>
+          <div class="tile reveal" style="--i:1"><img class="app" src="assets/icons/xcode.webp" alt="" width="64" height="64" loading="lazy" decoding="async"><h3>Xcode &amp; Simulator</h3><p>Run, stop and build; bring up the Simulator from anywhere.</p><div class="gesture"><span><b>3 fingers · triple tap</b>Run</span><span><b>4 fingers · hold</b>Simulator</span></div></div>
+          <div class="tile reveal" style="--i:2"><img class="app" src="assets/icons/ghostty.webp" alt="" width="64" height="64" loading="lazy" decoding="async"><h3>Terminal</h3><p>New tab, interrupt and clear in Ghostty, Terminal, iTerm2 and Warp.</p><div class="gesture"><span><b>4 fingers · tap</b>Interrupt</span><span><b>3 fingers · hold</b>Clear</span></div></div>
+          <div class="tile showcase reveal"><img src="assets/packs.webp" alt="TapDeck's six shortcut packs in Settings, switched on" width="1600" height="492" loading="lazy" decoding="async"></div>
         </div>
       </div>
     </section>

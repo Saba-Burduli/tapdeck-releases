@@ -49,15 +49,23 @@ const NAMES = {
 const APPLE_STRIPES = ['rgb(97,186,69)', 'rgb(252,184,38)', 'rgb(245,130,31)', 'rgb(224,59,61)', 'rgb(150,61,150)', 'rgb(3,158,219)'];
 const PT = 100 / 44;      // canvas pixels per app point: the tile is 44 pt in the app, 100 px here
 const ICONS = {};         // bundle ID → loaded <img>, only for installed apps
+// One icon set for the whole film: the Dock (screen.js) already loads these files, so the cards reuse them
+// instead of a second copy per bundle ID.
+const ICON_FILE = {
+  'com.anthropic.claudefordesktop': 'claude', 'com.google.Chrome': 'chrome', 'com.apple.Safari': 'safari',
+  'company.thebrowser.dia': 'dia', 'com.todesktop.230313mzl4w4u92': 'cursor', 'dev.zed.Zed': 'zed',
+  'com.jetbrains.pycharm': 'pycharm', 'com.jetbrains.rider': 'rider', 'com.apple.dt.Xcode': 'xcode',
+  'com.mitchellh.ghostty': 'ghostty', 'com.apple.Terminal': 'terminal',
+};
 
 async function loadIcons() {
   let installed = [];
-  try { installed = await (await fetch('out/icons/apps/installed.json')).json(); } catch { /* none exported */ }
-  await Promise.all(installed.map((id) => new Promise((resolve) => {
+  try { installed = await (await fetch('out/icons/installed.json')).json(); } catch { /* none exported */ }
+  await Promise.all(installed.filter((id) => ICON_FILE[id]).map((id) => new Promise((resolve) => {
     const img = new Image();
     img.onload = () => { ICONS[id] = img; resolve(); };
     img.onerror = resolve;
-    img.src = `out/icons/apps/${id}.png`;
+    img.src = `out/icons/${ICON_FILE[id]}.webp`;
   })));
 }
 

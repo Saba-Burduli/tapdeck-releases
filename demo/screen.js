@@ -225,7 +225,7 @@ export function makeScreen(canvas) {
   canvas.width = SW; canvas.height = SH;
   const g = canvas.getContext('2d');
   const wall = wallpaper();
-  const icons = ICONS.map((n) => { const img = new Image(); img.src = `assets/icons/${n}.png`; return [n, img]; });
+  const icons = ICONS.map((n) => { const img = new Image(); img.src = `assets/icons/${n}.webp`; return [n, img]; });
   const dockIcons = icons.filter(([n]) => n !== 'simulator');
   const iconOf = (n) => icons.find(([k]) => k === n)[1];
   const ready = Promise.all(icons.map(([, img]) => new Promise((r) => { if (img.complete) r(); else { img.onload = r; img.onerror = r; } })));

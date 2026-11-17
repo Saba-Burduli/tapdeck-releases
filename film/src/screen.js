@@ -220,7 +220,7 @@ export function makeScreen() {
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 8;
   const wall = wallpaper();
-  const icons = ICONS.map((n) => { const img = new Image(); img.src = `out/icons/${n}.png`; return [n, img]; });
+  const icons = ICONS.map((n) => { const img = new Image(); img.src = `out/icons/${n}.webp`; return [n, img]; });
   const dockIcons = icons.filter(([n]) => n !== 'simulator');
   const iconOf = (n) => icons.find(([k]) => k === n)[1];
   const ready = Promise.all(icons.map(([, img]) => new Promise((r) => { if (img.complete) r(); else { img.onload = r; img.onerror = r; } })));
