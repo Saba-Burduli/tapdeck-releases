@@ -131,27 +131,34 @@ function editor(g, r, alpha) {
   done();
 }
 
-function browser(g, r, alpha, newTab = 0) {
+const TABS = ['TapDeck', 'Release notes', 'Packs', 'Docs'];
+
+/// `tabs`: { n, change, k }: n tabs open now; the last one is in front. A tab that was just reopened (change +1)
+/// grows in as k runs 0 to 1; one that was just closed (change -1) shrinks away.
+function browser(g, r, alpha, tabs = { n: 3, change: 0, k: 1 }) {
   const done = windowShell(g, r, '', { alpha, titleBar: '#dee1e6' });
-  const tabs = ['TapDeck', 'Release notes', 'Packs'];
   const tw = Math.min(250, (r.w - 220) / 4.2);
-  const all = newTab > 0 ? [...tabs, 'Docs'] : tabs;
-  all.forEach((n, i) => {
-    const isNew = i === tabs.length;
-    const k = isNew ? easeOutBack(newTab) : 1;
+  const moving = tabs.k < 1 && tabs.change !== 0;
+  const shown = moving && tabs.change < 0 ? tabs.n + 1 : tabs.n;
+  const anim = moving ? (tabs.change > 0 ? tabs.n - 1 : tabs.n) : -1;
+  TABS.slice(0, shown).forEach((n, i) => {
+    const isAnim = i === anim;
+    const k = !isAnim ? 1 : tabs.change > 0 ? easeOutBack(tabs.k) : 1 - easeInOutCubic(tabs.k);
     const x = r.x + 120 + i * (tw + 6);
-    g.save(); g.globalAlpha *= isNew ? clamp(newTab * 2) : 1;
-    const active = isNew || (i === 0 && newTab === 0);
+    g.save(); g.globalAlpha *= isAnim ? clamp(tabs.change > 0 ? tabs.k * 2 : k * 1.5) : 1;
+    const active = i === tabs.n - 1 || (isAnim && tabs.change < 0);
     rr(g, x, r.y + 12, tw * k, 46, 12); g.fillStyle = active ? '#ffffff' : 'rgba(255,255,255,0.45)'; g.fill();
-    g.beginPath(); g.arc(x + 24, r.y + 35, 9, 0, Math.PI * 2); g.fillStyle = isNew ? PACK.browser.accent : '#9aa0a6'; g.fill();
-    g.save(); g.beginPath(); g.rect(x, r.y, tw * k - 10, 60); g.clip(); text(g, n, x + 44, r.y + 42, 19, INK); g.restore();
+    if (k > 0.3) { g.beginPath(); g.arc(x + 24, r.y + 35, 9, 0, Math.PI * 2); g.fillStyle = isAnim ? PACK.browser.accent : '#9aa0a6'; g.fill(); }
+    g.save(); g.beginPath(); g.rect(x, r.y, Math.max(0, tw * k - 10), 60); g.clip(); text(g, n, x + 44, r.y + 42, 19, INK); g.restore();
     g.restore();
   });
   g.fillStyle = '#ffffff'; g.fillRect(r.x, r.y + 58, r.w, 62);
   bar(g, r.x + 130, r.y + 70, r.w - 260, 40, '#f1f3f4');
   text(g, 'github.com/Saba-Burduli/tapdeck', r.x + 160, r.y + 97, 20, INK2);
   const page = r.y + 140;
-  text(g, newTab > 0.6 ? 'Docs' : 'TapDeck', r.x + 80, page + 70, 46, INK, 700);
+  // The page shows the tab in front; a reopened one takes over once it has mostly grown in.
+  const front = moving && tabs.change > 0 && tabs.k < 0.6 ? tabs.n - 2 : tabs.n - 1;
+  text(g, TABS[front], r.x + 80, page + 70, 46, INK, 700);
   bar(g, r.x + 80, page + 100, Math.min(560, r.w - 200), 14, FAINT);
   rr(g, r.x + 80, page + 140, r.w - 160, Math.min(300, r.h * 0.35), 20); g.fillStyle = '#f5f5f7'; g.fill();
   for (let i = 0; i < 6; i++) { const y = page + 480 + i * 38; if (y > r.y + r.h - 40) break; bar(g, r.x + 80, y, (r.w - 200) * [0.9, 0.7, 0.8, 0.5, 0.75, 0.6][i], 12, FAINT); }
@@ -228,28 +235,34 @@ export function makeScreen(canvas) {
   const full = R(0, MENU, SW, SH - MENU);
   const editorRest = R(110, 120, 1000, 660), browserRest = R(1100, 300, 860, 640), claudeRest = R(640, 200, 760, 880);
   const browserFront = R(280, 110, 1480, 980);
-  const FRAMES = { free, left, right, full };
+  // Window moves act on the window in front; each window keeps its own frame when the other app comes forward.
+  const FRAMES = { finder: { free, left, right, full }, chrome: { free: browserFront, left, right, full } };
 
   // Live state: when each thing last happened (seconds on the demo's clock). Far past means "never".
   const NEVER = -1e9;
   const s = {
     finder: { from: free, to: free, at: NEVER },
+    chrome: { from: browserFront, to: browserFront, at: NEVER },
+    tabs: { n: 3, change: 0, at: NEVER },
     missionIn: NEVER, missionOut: NEVER, claudeOpen: NEVER, claudeClose: NEVER, playPause: NEVER,
-    spotlight: NEVER, spotlightOut: NEVER, spotlightText: 'Simulator', screenshot: NEVER, reopenTab: NEVER, front: 'finder',
+    spotlight: NEVER, spotlightOut: NEVER, spotlightText: 'Simulator', screenshot: NEVER, front: 'finder',
   };
 
-  /// Finder's frame now: it eases from where it was to where the last gesture sent it.
-  const finderRect = (t) => lerpRect(s.finder.from, s.finder.to, easeInOutCubic(clamp((t - s.finder.at) / 0.34)));
+  /// A window's frame now: it eases from where it was to where the last gesture sent it.
+  const rectOf = (w, t) => lerpRect(s[w].from, s[w].to, easeInOutCubic(clamp((t - s[w].at) / 0.34)));
+  const missionOpen = (t) => t >= s.missionIn && t < s.missionOut;
 
   /// What the gestures do to the screen. Each records "now" so draw() animates it the way the film does.
   const act = {
-    move(name, t) { s.finder = { from: finderRect(t), to: FRAMES[name], at: t }; },
-    finderFrame: () => Object.keys(FRAMES).find((k) => FRAMES[k] === s.finder.to),
+    move(name, t) { const w = s.front; s[w] = { from: rectOf(w, t), to: FRAMES[w][name], at: t }; },
+    frontFrame: () => Object.keys(FRAMES[s.front]).find((k) => FRAMES[s.front][k] === s[s.front].to),
     missionControl(t) {
-      // Opens for a few seconds; another hold while it's open closes it.
-      const open = t >= s.missionIn && t < s.missionOut;
-      if (open) s.missionOut = t; else { s.missionIn = t; s.missionOut = t + 2.6; }
+      // Stays open until it's closed: another hold, any other gesture, or a long while untouched. Returns true if it opened.
+      if (missionOpen(t)) { s.missionOut = t; return false; }
+      s.missionIn = t; s.missionOut = t + 8;
+      return true;
     },
+    closeMissionControl(t) { if (missionOpen(t)) s.missionOut = t; },
     toggleClaude(t) {
       const open = t >= s.claudeOpen && t < s.claudeClose;
       if (open) s.claudeClose = t; else { s.claudeOpen = t; s.claudeClose = Infinity; }
@@ -258,8 +271,10 @@ export function makeScreen(canvas) {
     playPause(t) { s.playPause = t; },
     spotlight(t) { s.spotlight = t; s.spotlightOut = t + 1.9; },
     screenshot(t) { s.screenshot = t; },
-    reopenTab(t) { s.reopenTab = t; },
-    front(app) { s.front = app; s.reopenTab = NEVER; },
+    // Chrome starts with three tabs: closing takes the front one away (one always stays), reopening brings back up to four.
+    closeTab(t) { if (s.tabs.n <= 1) return false; s.tabs = { n: s.tabs.n - 1, change: -1, at: t }; return true; },
+    reopenTab(t) { if (s.tabs.n >= TABS.length) return false; s.tabs = { n: s.tabs.n + 1, change: 1, at: t }; return true; },
+    front(app) { s.front = app; },
   };
 
   function draw(t) {
@@ -269,22 +284,24 @@ export function makeScreen(canvas) {
     const mc = easeInOutCubic(clamp((t - s.missionIn) / 0.35)) * (1 - easeInOutCubic(clamp((t - s.missionOut) / 0.35)));
     const grid = [R(220, 250, 740, 440), R(1090, 250, 740, 440), R(220, 760, 740, 440), R(1090, 760, 740, 440)];
     const fit = (r, cell) => { const k = Math.min(cell.w / r.w, cell.h / r.h); return R(cell.x + (cell.w - r.w * k) / 2, cell.y + (cell.h - r.h * k) / 2, r.w * k, r.h * k); };
-    const fr = finderRect(t);
+    const fr = rectOf('finder', t), cr = rectOf('chrome', t);
+    const tabs = { ...s.tabs, k: clamp((t - s.tabs.at) / 0.3) };
     const chromeFront = s.front === 'chrome';
     const claudeK = t >= s.claudeOpen && t < s.claudeClose ? clamp((t - s.claudeOpen) / 0.4) : 0;
     const scaleIn = (r, k) => R(r.x + r.w * (1 - k) / 2, r.y + r.h * (1 - k) / 2, r.w * k, r.h * k);
 
-    let ed = editorRest, br = browserRest, cl = claudeRest;
+    // Behind Finder, Chrome rests in its own spot unless a gesture snapped or filled it while it was in front.
+    let ed = editorRest, br = s.chrome.to === browserFront ? browserRest : cr, cl = claudeRest;
     if (mc > 0) {
       g.filter = `blur(${18 * mc}px)`; g.drawImage(wall, 0, 0); g.filter = 'none';
       g.fillStyle = `rgba(0,0,0,${0.12 * mc})`; g.fillRect(0, 0, SW, SH);
       ed = lerpRect(ed, fit(ed, grid[0]), mc); br = lerpRect(br, fit(br, grid[1]), mc); cl = lerpRect(cl, fit(cl, grid[3]), mc);
     }
     editor(g, ed, 1);
-    if (!chromeFront) browser(g, br, 1);
+    if (!chromeFront) browser(g, br, 1, tabs);
     if (mc > 0) claude(g, cl, mc);
     finder(g, mc > 0 ? lerpRect(fr, fit(fr, grid[2]), mc) : fr, 1);
-    if (chromeFront) browser(g, mc > 0 ? lerpRect(browserFront, fit(browserFront, grid[1]), mc) : browserFront, 1, clamp((t - s.reopenTab) / 0.35));
+    if (chromeFront) browser(g, mc > 0 ? lerpRect(cr, fit(cr, grid[1]), mc) : cr, 1, tabs);
     if (mc > 0) {
       g.globalAlpha = mc;
       ['Zed', 'Chrome', 'Finder', 'Claude'].forEach((n, i) => text(g, n, grid[i].x + grid[i].w / 2, grid[i].y + grid[i].h + 44, 26, '#ffffff', 600, 'center'));

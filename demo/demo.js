@@ -2,7 +2,7 @@
 // trackpad is the app's water. Phones and iPads use real fingers. On a Mac the browser never sees multi-finger
 // trackpad taps (macOS keeps them), so visitors pick how many fingers and click.
 import { makeScreen } from './screen.js';
-import { makeRecognizer } from './recognizer.js';
+import { makeRecognizer, RULES, MOUSE_RULES } from './recognizer.js';
 import { makeWater } from '../water.js';
 
 
@@ -13,17 +13,18 @@ const BROWSER = { name: 'Browser', dot: '#7FB2EE' };
 const BINDINGS = [
   { key: 'tap4x1', label: '4 fingers · tap', does: 'Snap left', pack: EVERYDAY, run: (a, t) => a.move('left', t) },
   { key: 'tap4x2', label: '4 fingers · double tap', does: 'Snap right', pack: EVERYDAY, run: (a, t) => a.move('right', t) },
-  { key: 'tap4x3', label: '4 fingers · triple tap', does: 'Full screen', pack: EVERYDAY, run: (a, t) => a.move(a.finderFrame() === 'full' ? 'free' : 'full', t) },
-  { key: 'hold3', label: '3 fingers · hold', does: 'Mission Control', pack: EVERYDAY, run: (a, t) => a.missionControl(t) },
+  { key: 'tap4x3', label: '4 fingers · triple tap', does: 'Full screen', pack: EVERYDAY, run: (a, t) => a.move(a.frontFrame() === 'full' ? 'free' : 'full', t) },
+  { key: 'hold3', label: '3 fingers · hold', does: 'Mission Control', pack: EVERYDAY, run: (a, t) => (a.missionControl(t) ? 'Mission Control' : 'Close Mission Control') },
   { key: 'tap5x1', label: '5 fingers · tap', does: 'Play / pause', pack: EVERYDAY, run: (a, t) => a.playPause(t) },
   { key: 'corner-top-right', label: 'Top-right corner', does: 'Spotlight', pack: EVERYDAY, run: (a, t) => a.spotlight(t) },
   { key: 'corner-top-left', label: 'Top-left corner', does: 'Screenshot', pack: EVERYDAY, run: (a, t) => a.screenshot(t) },
   { key: 'tap3x2', label: '3 fingers · double tap', does: 'Open or hide Claude', pack: CLAUDE, run: (a, t) => a.toggleClaude(t) },
 ];
 // Chrome in front: the Browser pack's gestures take over, so the same tap does something else.
+// A binding's run() may return a string to say what actually happened this time.
 const IN_CHROME = [
-  { key: 'tap4x1', label: '4 fingers · tap', does: 'Reopen closed tab', pack: BROWSER, run: (a, t) => a.reopenTab(t) },
-  { key: 'tap4x2', label: '4 fingers · double tap', does: 'Close tab', pack: BROWSER, run: (a) => a.front('chrome') },   // closes the reopened tab
+  { key: 'tap4x1', label: '4 fingers · tap', does: 'Reopen closed tab', pack: BROWSER, run: (a, t) => (a.reopenTab(t) ? 'Reopen closed tab' : 'Reopen closed tab: none left to reopen') },
+  { key: 'tap4x2', label: '4 fingers · double tap', does: 'Close tab', pack: BROWSER, run: (a, t) => (a.closeTab(t) ? 'Close tab' : 'Close tab: the last tab stays open') },
 ];
 const COUNT = ['', 'tap', 'double tap', 'triple tap'];
 
@@ -65,36 +66,52 @@ function start(root) {
     pillTimer = setTimeout(() => pill.classList.remove('show'), 2600);
   }
 
-  const recognizer = makeRecognizer({
-    onHolding: (k) => { ring.style.setProperty('--k', k); ring.classList.toggle('on', k > 0); },
-    onGesture(g) {
-      const key = g.kind === 'corner' ? `corner-${g.corner}` : g.kind === 'hold' ? `hold${g.fingers}` : `tap${g.fingers}x${g.count}`;
-      const b = bindings().find((x) => x.key === key);
-      const what = g.kind === 'corner' ? `${g.corner.replace('-', ' ')} corner` : `${g.fingers} finger${g.fingers > 1 ? 's' : ''} · ${g.kind === 'hold' ? 'hold' : COUNT[g.count]}`;
-      if (!b) {
-        say(`${what}: not set up here. Try one from the list.`, null, false);
-        return;
-      }
-      b.run(screen.act, now());
-      say(`${what} → ${b.does}`, b.pack);
-      for (const li of cheat.children) li.classList.toggle('lit', li.dataset.key === key);
-      setTimeout(() => cheat.querySelector(`[data-key="${key}"]`)?.classList.remove('lit'), 1400);
-    },
-  });
+  // One highlight timer, restarted by each gesture, so a repeat isn't cut short by the one before.
+  let litTimer = 0;
+  function light(key) {
+    for (const li of cheat.children) li.classList.toggle('lit', li.dataset.key === key);
+    clearTimeout(litTimer);
+    litTimer = setTimeout(() => { for (const li of cheat.children) li.classList.remove('lit'); }, 1400);
+  }
+
+  function onGesture(g) {
+    const key = g.kind === 'corner' ? `corner-${g.corner}` : g.kind === 'hold' ? `hold${g.fingers}` : `tap${g.fingers}x${g.count}`;
+    const b = bindings().find((x) => x.key === key);
+    const what = g.kind === 'corner' ? `${g.corner.replace('-', ' ')} corner` : `${g.fingers} finger${g.fingers > 1 ? 's' : ''} · ${g.kind === 'hold' ? 'hold' : COUNT[g.count]}`;
+    // Mission Control stays up until something else happens; its own hold toggles it.
+    if (key !== 'hold3') screen.act.closeMissionControl(now());
+    if (!b) {
+      say(`${what}: not set up here. Try one from the list.`, null, false);
+      return;
+    }
+    const did = b.run(screen.act, now());
+    say(`${what} → ${typeof did === 'string' ? did : b.does}`, b.pack);
+    light(key);
+  }
+  // A touch that was neither a tap nor a hold would otherwise do nothing at all; say why.
+  function onReject({ reason, duration }) {
+    say(reason === 'moved' ? (duration > 0.5 ? 'You moved while holding: keep still for 1.5 s' : 'You moved while tapping: keep still')
+      : 'That was a long press: tap quickly, or hold for 1.5 s for a hold', null, false);
+  }
+  const onHolding = (k) => { ring.style.setProperty('--k', k); ring.classList.toggle('on', k > 0); };
+  const aspect = () => { const r = pad.getBoundingClientRect(); return r.width / r.height || 1; };
+  // Clicks get roomier timing than fingers (see MOUSE_RULES); touch screens keep the app's rules.
+  const mouseRec = makeRecognizer({ onGesture, onHolding, onReject, aspect, rules: MOUSE_RULES });
+  const touchRec = makeRecognizer({ onGesture, onHolding, onReject, aspect, rules: RULES });
 
   // ---- Input. Real fingers on touch screens; on a Mac, the picked number of fingers at each click.
   const rect = () => pad.getBoundingClientRect();
   const toUV = (x, y) => { const r = rect(); return [Math.min(1, Math.max(0, (x - r.left) / r.width)), Math.min(1, Math.max(0, (y - r.top) / r.height))]; };
-  const corners = (uv) => {
-    const c = 0.15;
-    return (uv[0] < c || uv[0] > 1 - c) && (uv[1] < c || uv[1] > 1 - c);
-  };
+  // Only the top corners have bindings and dashed boxes, so a click lower down is an ordinary tap. The boxes
+  // end exactly at the corner zone's inner edge (styles.css), so what you see is what counts.
+  const corners = ([u, v]) => (u < RULES.cornerSize || u > 1 - RULES.cornerSize) && v < RULES.cornerSize;
   // A click stands for several fingertips side by side, so the water shows them all.
   const spread = ([u, v], n) => Array.from({ length: n }, (_, i) => [u + (i - (n - 1) / 2) * 0.075, v + Math.abs(i - (n - 1) / 2) * 0.03]);
 
   let mouse = null;
   pad.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'touch') return;          // touch screens use the touch events below
+    if (e.button !== 0) return;                     // right and middle clicks aren't taps
     e.preventDefault();
     pad.setPointerCapture(e.pointerId);
     const uv = toUV(e.clientX, e.clientY);
@@ -102,13 +119,14 @@ function start(root) {
     mouse = { n };
     const pts = spread(uv, n);
     water.press(pts);
-    recognizer.update(pts);
+    mouseRec.update(pts, e.timeStamp / 1000);
   });
+  pad.addEventListener('contextmenu', (e) => e.preventDefault());
   pad.addEventListener('pointermove', (e) => {
     if (!mouse || e.pointerType === 'touch') return;
     const pts = spread(toUV(e.clientX, e.clientY), mouse.n);
     water.press(pts);
-    recognizer.update(pts);
+    mouseRec.update(pts, e.timeStamp / 1000);
   });
   const up = (e) => {
     if (!mouse || e.pointerType === 'touch') return;
@@ -116,7 +134,7 @@ function start(root) {
     mouse = null;
     water.lift();
     water.splash(pts);
-    recognizer.update([]);
+    mouseRec.update([], e.timeStamp / 1000);
   };
   pad.addEventListener('pointerup', up);
   pad.addEventListener('pointercancel', up);
@@ -127,7 +145,7 @@ function start(root) {
     e.preventDefault();
     const pts = touchPoints(e);
     if (pts.length) { water.press(pts); lastTouch = pts; } else { water.lift(); water.splash(lastTouch); }
-    recognizer.update(pts);
+    touchRec.update(pts, e.timeStamp / 1000);
   };
   for (const type of ['touchstart', 'touchmove', 'touchend', 'touchcancel']) pad.addEventListener(type, onTouch, { passive: false });
 
