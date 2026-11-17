@@ -9,10 +9,10 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <canvas id="water" aria-hidden="true"></canvas>
-  <header class="top"><div class="wrap"><a class="brand" href="./"><img src="assets/icon.png" alt="">TapDeck</a></div></header>
-  <main class="wrap doc">
-    <img src="assets/icon.png" alt="" width="84" height="84" style="margin:8px 0 18px; filter: drop-shadow(0 14px 28px rgba(0,0,0,0.22))">
+  <div class="globalnav"><div class="wrap"><a class="mark" href="./"><img src="assets/icon.png" alt="">TapDeck</a><nav><a href="./#how">Try it</a><a href="./#packs">Packs</a><a href="./#pricing">Pricing</a><a href="./#faq">FAQ</a></nav></div></div>
+  <div class="localnav"><div class="wrap"><a class="title" href="./">TapDeck</a><nav><a class="btn primary small" href="buy.html">Buy</a></nav></div></div>
+  <main class="doc">
+    <img class="badge" src="assets/icon.png" alt="">
     <h1>Thank you.</h1>
     <p id="status">Your licence key is on its way to your email. It's also on the payment confirmation page you just saw.</p>
 
@@ -28,14 +28,16 @@
     <h2>Can't find your key?</h2>
     <p>Check your spam folder for the email from Dodo Payments, or find the key any time in the Dodo Payments customer portal (the link is in your receipt). Still stuck? Visit <a href="https://github.com/Saba-Burduli/tapdeck-releases/issues">our support page</a>, without posting your key or email publicly.</p>
   </main>
-  <footer><div class="wrap"><span>© 2026 TapDeck</span><nav><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="refund.html">Refunds</a></nav><p class="legal">Payments are processed by Dodo Payments, our merchant of record.</p></div></footer>
-  <script type="module" src="water.js"></script>
+  <footer class="site"><div class="wrap">
+    <p class="fine">Payments are processed by Dodo Payments, our merchant of record. TapDeck is not affiliated with Apple Inc. Mac, MacBook and macOS are trademarks of Apple Inc.</p>
+    <div class="row"><span>Copyright © 2026 TapDeck. All rights reserved.</span><nav><a href="terms.html">Terms of Service</a><a href="privacy.html">Privacy Policy</a><a href="refund.html">Refunds</a><a href="https://github.com/Saba-Burduli/tapdeck-releases/issues">Support</a></nav></div>
+  </div></footer>
   <script>
     // Dodo adds ?status=… to the return URL. Only the wording changes; the key itself always comes from Dodo.
     const status = new URLSearchParams(location.search).get('status');
     if (status && status !== 'succeeded' && status !== 'active') {
       document.querySelector('h1').textContent = 'Payment not completed.';
-      document.getElementById('status').textContent = "The payment didn't go through, so no licence was issued. You can try again from the pricing page.";
+      document.getElementById('status').innerHTML = 'The payment didn\'t go through, so no licence was issued. You can try again from the <a href="buy.html">Buy page</a>.';
     }
   </script>
 </body>

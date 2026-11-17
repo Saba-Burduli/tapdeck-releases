@@ -6,165 +6,154 @@
   <title>TapDeck: your MacBook trackpad, as a shortcut panel</title>
   <meta name="description" content="TapDeck turns quick multi-finger taps on your Mac's trackpad into shortcuts: snap windows, open Claude, control media and more. $9 a year.">
   <meta property="og:title" content="TapDeck">
-  <meta property="og:description" content="Your MacBook trackpad, as a shortcut panel. $9 a year.">
+  <meta property="og:description" content="Your trackpad. Now a shortcut panel. $9 a year.">
   <meta property="og:image" content="assets/poster.jpg">
+  <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="assets/favicon.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <canvas id="water" aria-hidden="true"></canvas>
-  <header class="top">
-    <div class="wrap">
-      <a class="brand" href="./"><img src="assets/icon.png" alt="">TapDeck</a>
-      <nav>
-        <a class="link" href="#how">How it works</a>
-        <a class="link" href="#pricing">Pricing</a>
-        <a class="link" href="#faq">FAQ</a>
-        <a class="btn primary small buy" href="#pricing">Buy</a>
-      </nav>
-    </div>
-  </header>
+  <div class="globalnav"><div class="wrap"><a class="mark" href="./"><img src="assets/icon.png" alt="">TapDeck</a><nav><a href="#how">Try it</a><a href="#packs">Packs</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav></div></div>
+  <div class="localnav"><div class="wrap"><a class="title" href="./">TapDeck</a><nav><a href="#film">Overview</a><a href="#how">Try it</a><a href="#packs">Packs</a><a class="btn primary small" href="buy.html">Buy</a></nav></div></div>
 
   <main>
-    <div class="stage">
-      <!-- The film as the introduction's backdrop: the teaser without its captions, silent, looping. -->
-      <div class="stage-film" aria-hidden="true">
-        <video class="wide" data-src="assets/hero.mp4" poster="assets/hero-poster.jpg" muted loop playsinline autoplay></video>
-        <video class="tall" data-src="assets/hero-tall.mp4" poster="assets/hero-poster-tall.jpg" muted loop playsinline autoplay></video>
-      </div>
-      <div class="hero wrap">
-        <img class="icon" src="assets/icon.png" alt="TapDeck icon">
-        <h1>Your trackpad<br><span class="soft">is a shortcut panel.</span></h1>
-        <p class="lede">Tap with three fingers to open Claude. Tap with four to snap a window. TapDeck turns quick multi-finger taps into the shortcuts you use all day.</p>
-        <div class="cta">
-          <a class="btn primary buy" href="#pricing">Buy for $9 a year</a>
-          <a class="btn ghost" href="#how">How it works</a>
-        </div>
-        <p class="fine">macOS 14 Sonoma or later · built-in trackpad or Magic Trackpad</p>
-      </div>
-    </div>
+    <section class="hero wrap">
+      <img class="icon reveal" src="assets/icon.png" alt="TapDeck icon">
+      <p class="eyebrow rainbow reveal" style="--i:1">TapDeck</p>
+      <h1 class="reveal" style="--i:2">Your trackpad.<br>Now a shortcut panel.</h1>
+      <p class="price reveal" style="--i:3">Just $9 a year. <span>For up to 3 Macs.</span></p>
+      <div class="ctas reveal" style="--i:4"><a class="btn primary" href="buy.html">Buy</a><a class="more" href="#how">Try it in your browser</a></div>
+    </section>
 
-    <section id="how" class="wrap">
-      <h2>Try it.</h2>
-      <p class="section-lede">Tap the trackpad below and watch the Mac answer. <span class="touch-only">Use three, four or five fingers at once.</span><span class="mouse-only">Pick how many fingers, then click. Click once, twice or three times, hold for a moment, or click a corner.</span></p>
-      <div class="demo">
-        <div class="demo-screen">
-          <div class="bezel"><canvas aria-label="A Mac screen that responds to your gestures" role="img"></canvas></div>
-          <div class="demo-pill" role="status" aria-live="polite"><span class="dot"></span><span class="text"></span></div>
+    <!-- The MacBook from our 3D teaser, scrubbed by the scroll: the lid opens, fingers tap, windows move. -->
+    <section class="scrub" id="film" data-frames="132" data-wide="assets/frames/wide/" data-tall="assets/frames/tall/">
+      <div class="scrub-stage">
+        <canvas aria-label="A MacBook opening, then answering four-finger taps" role="img"></canvas>
+        <div class="scrub-caption" data-from="0.00" data-to="0.14"><h2>Meet TapDeck.</h2><p>Scroll to open.</p></div>
+        <div class="scrub-caption" data-from="0.20" data-to="0.40"><h2>The trackpad you already have.</h2><p>Now it knows how many fingers you tap with.</p></div>
+        <div class="scrub-caption" data-from="0.50" data-to="0.66"><h2>Four fingers. Snap left.</h2><span class="chip"><i></i>4 fingers · tap</span></div>
+        <div class="scrub-caption" data-from="0.72" data-to="0.86"><h2>Twice. Snap right.</h2><span class="chip"><i></i>4 fingers · double tap</span></div>
+        <div class="scrub-caption" data-from="0.90" data-to="1.01"><h2>Three times. Full screen.</h2><span class="chip"><i></i>4 fingers · triple tap</span></div>
+        <div class="scrub-progress" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+    </section>
+
+    <section id="how" class="section panel">
+      <div class="wide-wrap">
+        <div class="section-head">
+          <p class="eyebrow reveal">Try it</p>
+          <h2 class="headline reveal" style="--i:1">Tap. Watch the Mac answer.</h2>
+          <p class="lede reveal" style="--i:2"><span class="touch-only">Use three, four or five fingers at once on the trackpad below.</span><span class="mouse-only">Pick how many fingers, then click the trackpad: once, twice, three times, or hold. Click a corner for corner taps.</span></p>
         </div>
-        <div class="demo-side">
-          <div class="demo-apps" role="group" aria-label="App in front">
-            <span>In front</span>
-            <button type="button" data-app="finder" aria-pressed="true"><img src="assets/icons/finder.png" alt="">Finder</button>
-            <button type="button" data-app="chrome" aria-pressed="false"><img src="assets/icons/chrome.png" alt="">Chrome</button>
+        <div class="demo reveal" style="--i:3">
+          <div class="demo-screen">
+            <div class="bezel"><canvas aria-label="A Mac screen that responds to your gestures" role="img"></canvas></div>
+            <div class="demo-pill" role="status" aria-live="polite"><span class="dot"></span><span class="text"></span></div>
           </div>
-          <div class="demo-pad" aria-label="Trackpad: tap here">
-            <canvas aria-hidden="true"></canvas>
-            <i class="corner tl"></i><i class="corner tr"></i>
-            <div class="demo-hold" aria-hidden="true"></div>
-            <span class="pad-hint"><span class="mouse-only">Click here</span><span class="touch-only">Tap with 3, 4 or 5 fingers</span></span>
+          <div class="demo-side">
+            <div class="demo-apps" role="group" aria-label="App in front">
+              <span>In front</span>
+              <button type="button" data-app="finder" aria-pressed="true"><img src="assets/icons/finder.png" alt="">Finder</button>
+              <button type="button" data-app="chrome" aria-pressed="false"><img src="assets/icons/chrome.png" alt="">Chrome</button>
+            </div>
+            <div class="demo-pad" aria-label="Trackpad: tap here">
+              <canvas aria-hidden="true"></canvas>
+              <i class="corner tl"></i><i class="corner tr"></i>
+              <div class="demo-hold" aria-hidden="true"></div>
+              <span class="pad-hint"><span class="mouse-only">Click here</span><span class="touch-only">Tap with 3, 4 or 5 fingers</span></span>
+            </div>
+            <div class="demo-fingers mouse-only" role="group" aria-label="Fingers per click">
+              <span>Fingers</span>
+              <button type="button" data-n="3">3</button><button type="button" data-n="4">4</button><button type="button" data-n="5">5</button>
+              <kbd>or press 3 · 4 · 5</kbd>
+            </div>
+            <ul class="demo-cheat" aria-label="Gestures"></ul>
           </div>
-          <div class="demo-fingers mouse-only" role="group" aria-label="Fingers per click">
-            <span>Fingers</span>
-            <button type="button" data-n="3">3</button><button type="button" data-n="4">4</button><button type="button" data-n="5">5</button>
-            <kbd>or press 3 · 4 · 5</kbd>
-          </div>
-          <ul class="demo-cheat" aria-label="Gestures"></ul>
         </div>
-      </div>
-      <p class="fine demo-note">On a Mac, browsers never see multi-finger trackpad taps, so here you pick the fingers and click. The real app reads your fingers straight from the trackpad.</p>
-    </section>
-
-    <section class="wrap">
-      <h2>Shortcut packs.</h2>
-      <p class="section-lede">Switch them on like plugins. App packs only work while their app is in front, so the same tap does the right thing in Chrome, Xcode, Zed or your terminal.</p>
-      <img class="shot" src="assets/packs.jpg" alt="TapDeck's six shortcut packs: Everyday Mac, Claude, Browser, Code Editors, Xcode and Simulator, Terminal">
-    </section>
-
-    <section class="wrap">
-      <div class="points">
-        <div><h3>Instant</h3><p>TapDeck reads your fingers about 100 times a second and fires the moment it's sure. Taps, clicks, holds and corners all count.</p></div>
-        <div><h3>Effortless</h3><p>Record a gesture by doing it. Pick any app, keyboard shortcut, window move or media key, and tune the timing to your hand.</p></div>
-        <div><h3>Private</h3><p>No account and no tracking. It runs entirely on your Mac; the only connection is a daily licence check.</p></div>
+        <p class="demo-note">On a Mac, browsers never see multi-finger trackpad taps, so here you pick the fingers and click. The real app reads your fingers straight from the trackpad.</p>
       </div>
     </section>
 
-    <section id="pricing" class="wrap">
-      <div class="price-card">
-        <div>
-          <div class="amount">$9</div>
-          <div class="per">a year, for up to 3 Macs</div>
-          <a class="btn primary buy" href="#pricing">Buy TapDeck</a>
-          <p class="fine">Secure checkout by Dodo Payments, our reseller and merchant of record. Taxes included where they apply. Cancel any time.</p>
+    <section id="packs" class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow reveal">Shortcut packs</p>
+          <h2 class="headline reveal" style="--i:1">Switch them on like plugins.</h2>
+          <p class="lede reveal" style="--i:2">App packs work only while their app is in front, so one tap does the right thing everywhere.</p>
         </div>
-        <div>
-          <ul>
-            <li>Every gesture and every shortcut pack</li>
-            <li>Your own shortcuts, per app</li>
-            <li>All updates while your year is active</li>
-            <li>Use it on up to 3 Macs</li>
-          </ul>
-          <ol class="steps" style="margin-top:22px">
-            <li>Pay at checkout. Your licence key appears on the payment page and in your email.</li>
-            <li>Download TapDeck and open it.</li>
-            <li>Paste your key and click Activate.</li>
-          </ol>
+        <div class="tiles">
+          <div class="tile reveal"><img class="app" src="assets/icon.png" alt=""><h3>Everyday Mac</h3><p>Windows, Mission Control, Spotlight and media, in every app.</p><div class="gesture"><span><b>4 fingers · tap</b>Snap left</span><span><b>Top-right corner</b>Spotlight</span></div></div>
+          <div class="tile reveal" style="--i:1"><img class="app" src="assets/icons/claude.png" alt=""><h3>Claude</h3><p>Open Claude from anywhere; new chat and stop while you're in it.</p><div class="gesture"><span><b>3 fingers · double tap</b>Open Claude</span><span><b>4 fingers · tap</b>Stop</span></div></div>
+          <div class="tile reveal" style="--i:2"><img class="app" src="assets/icons/dia.png" alt=""><h3>Browser</h3><p>Tabs, private windows, refresh and DevTools in six browsers.</p><div class="gesture"><span><b>4 fingers · tap</b>Reopen tab</span><span><b>3 fingers · hold</b>Refresh</span></div></div>
+          <div class="tile reveal"><img class="app" src="assets/icons/zed.png" alt=""><h3>Code Editors</h3><p>Command palette, quick open and AI suggestions in 15 editors.</p><div class="gesture"><span><b>3 fingers · tap</b>Command palette</span><span><b>4 fingers · tap</b>Accept suggestion</span></div></div>
+          <div class="tile reveal" style="--i:1"><img class="app" src="assets/icons/xcode.png" alt=""><h3>Xcode &amp; Simulator</h3><p>Run, stop and build; bring up the Simulator from anywhere.</p><div class="gesture"><span><b>3 fingers · triple tap</b>Run</span><span><b>4 fingers · hold</b>Simulator</span></div></div>
+          <div class="tile reveal" style="--i:2"><img class="app" src="assets/icons/ghostty.png" alt=""><h3>Terminal</h3><p>New tab, interrupt and clear in Ghostty, Terminal, iTerm2 and Warp.</p><div class="gesture"><span><b>4 fingers · tap</b>Interrupt</span><span><b>3 fingers · hold</b>Clear</span></div></div>
+          <div class="tile showcase reveal"><img src="assets/packs.jpg" alt="TapDeck's six shortcut packs in Settings, switched on" loading="lazy"></div>
         </div>
       </div>
     </section>
 
-    <section id="faq" class="wrap">
-      <h2>Questions</h2>
-      <details><summary>Where do I get my licence key?</summary><p>Right after you pay, on the payment confirmation page and in your receipt email. You can find it again any time in the Dodo Payments customer portal.</p></details>
-      <details><summary>What happens when the year ends?</summary><p>Your subscription renews for another $9 unless you cancel. If it ends, TapDeck pauses its gestures until you renew.</p></details>
-      <details><summary>Can I use it on more than one Mac?</summary><p>Yes, on up to 3 Macs at once. To move it to a new Mac, deactivate an old one in TapDeck's Settings › About.</p></details>
-      <details><summary>Can I get a refund?</summary><p>Yes, within 14 days of buying. See the <a href="refund.html">refund policy</a>.</p></details>
-      <details><summary>Does it work offline?</summary><p>Yes. TapDeck checks your licence once a day and keeps working for 7 days without a connection.</p></details>
-      <details><summary>Why isn't it on the Mac App Store?</summary><p>TapDeck reads raw finger positions from the trackpad, which Apple doesn't allow in App Store apps. It's the same approach as BetterTouchTool.</p></details>
+    <section class="section panel">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="headline reveal">Built to feel instant.</h2>
+          <p class="lede reveal" style="--i:1">TapDeck only listens. Pointing, clicking, scrolling and system swipes keep working exactly as before.</p>
+        </div>
+        <div class="numbers">
+          <div class="reveal"><div class="n" data-count="100">0<small>×</small></div><p>Finger readings<br>every second</p></div>
+          <div class="reveal" style="--i:1"><div class="n" data-count="0.3" data-decimals="1">0<small>s</small></div><p>The longest a tap<br>can last</p></div>
+          <div class="reveal" style="--i:2"><div class="n" data-count="3">0</div><p>Macs on one<br>licence</p></div>
+          <div class="reveal" style="--i:3"><div class="n" data-count="0">0</div><p>Accounts, trackers<br>or analytics</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="water-moment">
+      <div class="copy wrap">
+        <p class="eyebrow rainbow reveal">The water</p>
+        <h2 class="headline reveal" style="--i:1">The same water you see in the app.</h2>
+        <p class="lede reveal" style="--i:2">Every Settings tab floats on it, and your fingers ripple it. Move your pointer across it.</p>
+      </div>
+      <div class="pool reveal" style="--i:3"><canvas aria-hidden="true"></canvas><span>Move or click to make ripples</span></div>
+      <div class="after"></div>
+    </section>
+
+    <section id="pricing" class="section pricing">
+      <div class="wrap">
+        <p class="eyebrow reveal">Pricing</p>
+        <h2 class="headline reveal" style="--i:1">One plan. Everything in it.</h2>
+        <div class="amount reveal" style="--i:2">$9<span> / year</span></div>
+        <ul class="included">
+          <li class="reveal"><b>Every gesture</b>Taps, holds, corners, 1 to 5 fingers.</li>
+          <li class="reveal" style="--i:1"><b>All six packs</b>Plus your own shortcuts, per app.</li>
+          <li class="reveal" style="--i:2"><b>Up to 3 Macs</b>Move it any time from Settings.</li>
+          <li class="reveal" style="--i:3"><b>A year of updates</b>Cancel any time; 14-day refunds.</li>
+        </ul>
+        <div class="ctas reveal" style="--i:4"><a class="btn primary" href="buy.html">Buy</a><a class="more" href="#faq">Questions</a></div>
+      </div>
+    </section>
+
+    <section id="faq" class="section panel">
+      <div class="wrap">
+        <div class="section-head"><h2 class="headline reveal">Questions? Answers.</h2></div>
+        <div class="faq reveal" style="--i:1">
+          <details><summary>Where do I get my licence key?</summary><p>Right after you pay, on the payment confirmation page and in your receipt email. You can find it again any time in the Dodo Payments customer portal.</p></details>
+          <details><summary>What happens when the year ends?</summary><p>Your subscription renews for another $9 unless you cancel. If it ends, TapDeck pauses its gestures until you renew.</p></details>
+          <details><summary>Can I use it on more than one Mac?</summary><p>Yes, on up to 3 Macs at once. To move it to a new Mac, deactivate an old one in TapDeck's Settings › About.</p></details>
+          <details><summary>Can I get a refund?</summary><p>Yes, within 14 days of buying. See the <a href="refund.html">refund policy</a>.</p></details>
+          <details><summary>Does it work offline?</summary><p>Yes. TapDeck checks your licence once a day and keeps working for 7 days without a connection.</p></details>
+          <details><summary>Why isn't it on the Mac App Store?</summary><p>TapDeck reads raw finger positions from the trackpad, which App Store apps can't do. It's the same approach as BetterTouchTool.</p></details>
+        </div>
+      </div>
     </section>
   </main>
 
-  <footer>
-    <div class="wrap">
-      <span>© 2026 TapDeck</span>
-      <nav>
-        <a href="terms.html">Terms</a>
-        <a href="privacy.html">Privacy</a>
-        <a href="refund.html">Refunds</a>
-        <a href="https://github.com/Saba-Burduli/tapdeck-releases/issues">Support</a>
-      </nav>
-      <p class="legal">TapDeck is not affiliated with Apple Inc. Mac, MacBook and macOS are trademarks of Apple Inc. Payments are processed by Dodo Payments, our merchant of record.</p>
-    </div>
-  </footer>
-  <script type="module" src="water.js"></script>
+  <footer class="site"><div class="wrap">
+    <p class="fine">Payments are processed by Dodo Payments, our merchant of record. TapDeck is not affiliated with Apple Inc. Mac, MacBook and macOS are trademarks of Apple Inc.</p>
+    <div class="row"><span>Copyright © 2026 TapDeck. All rights reserved.</span><nav><a href="terms.html">Terms of Service</a><a href="privacy.html">Privacy Policy</a><a href="refund.html">Refunds</a><a href="https://github.com/Saba-Burduli/tapdeck-releases/issues">Support</a></nav></div>
+  </div></footer>
+
+  <script type="module" src="scroll.js"></script>
   <script type="module" src="demo/demo.js"></script>
-  <script>
-    // Buy buttons go to Dodo's static payment link once the live product exists; until then they scroll to Pricing.
-    // Set PRODUCT_ID to the live "TapDeck — 1 year" product (pdt_…) from the Dodo dashboard.
-    const PRODUCT_ID = null;
-    if (PRODUCT_ID) {
-      const url = new URL(`https://checkout.dodopayments.com/buy/${PRODUCT_ID}`);
-      url.searchParams.set('quantity', '1');
-      url.searchParams.set('redirect_url', new URL('thanks.html', location.href).href);
-      for (const a of document.querySelectorAll('a.buy')) a.href = url.href;
-    }
-  </script>
-  <script>
-    // The film plays silently on a loop, as part of the page. Only the one that fits the screen loads.
-    (() => {
-      const film = document.querySelector('.stage-film');
-      const videos = [...film.querySelectorAll('video')];
-      const pick = () => {
-        for (const v of videos) {
-          const shown = getComputedStyle(v).display !== 'none';
-          if (shown && !v.src) { v.src = v.dataset.src; v.play().catch(() => {}); }
-          if (!shown && !v.paused) v.pause();
-          if (shown && v.paused && v.src) v.play().catch(() => {});
-        }
-      };
-      pick();
-      addEventListener('resize', pick);
-    })();
-  </script>
 </body>
 </html>

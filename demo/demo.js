@@ -35,7 +35,7 @@ function start(root) {
   const cheat = root.querySelector('.demo-cheat');
   const ring = root.querySelector('.demo-hold');
   const screen = makeScreen(screenCanvas);
-  const water = makeWater(pad.querySelector('canvas'), { element: true, fingerRadius: 0.07 });
+  const water = makeWater(pad.querySelector('canvas'), { element: true, fingerRadius: 0.07, dark: false });
   const now = () => performance.now() / 1000;
   let front = 'finder';
   let fingers = 4;

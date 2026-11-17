@@ -3,7 +3,8 @@
 // makeWater(canvas) fills the page behind everything: the pointer presses into it like a finger on the trackpad,
 // a click splashes, drops fall now and then. makeWater(canvas, { element: true }) fills one element instead (the demo's
 // trackpad) and is driven by its owner through press(), lift() and splash().
-export function makeWater(canvas, { element = false, autoDrops = !element, fingerRadius = 0.03 } = {}) {
+export function makeWater(canvas, { element = false, autoDrops = !element, fingerRadius = 0.03, dark: theme = null } = {}) {
+  // `dark`: true or false fixes the look; null follows the system setting.
   const gl = canvas && canvas.getContext('webgl2', { premultipliedAlpha: true, antialias: false });
   if (!gl) return null;
   const canRenderFloat = !!gl.getExtension('EXT_color_buffer_float');
@@ -212,12 +213,12 @@ export function makeWater(canvas, { element = false, autoDrops = !element, finge
   });
 
   function uniforms(loc, t, nFingers) {
-    const dark = darkQuery.matches;
+    const isDark = theme === null ? darkQuery.matches : theme;
     gl.uniform1i(loc.state, 0);
-    gl.uniform4f(loc.size, cssW, cssH, reduceMotion.matches ? 0 : t, dark ? 1 : 0);
+    gl.uniform4f(loc.size, cssW, cssH, reduceMotion.matches ? 0 : t, isDark ? 1 : 0);
     gl.uniform4f(loc.counts, nFingers, BLOBS.length, 1 / gw, 1 / gh);
     gl.uniform4f(loc.tune, 0.982, 0.24, reduceMotion.matches ? 1 : 0, energy);
-    gl.uniform3fv(loc.base, dark ? [0.055, 0.062, 0.078] : [0.925, 0.937, 0.955]);
+    gl.uniform3fv(loc.base, isDark ? [0.055, 0.062, 0.078] : [0.925, 0.937, 0.955]);
     gl.uniform4fv(loc.fingers, fingerData);
     gl.uniform4fv(loc.blobPos, blobPos);
     gl.uniform4fv(loc.blobCol, blobCol);

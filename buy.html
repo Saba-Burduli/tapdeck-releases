@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Buy TapDeck</title>
+  <meta name="description" content="Buy TapDeck: $9 a year, for up to 3 Macs. Every gesture and every shortcut pack.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="globalnav"><div class="wrap"><a class="mark" href="./"><img src="assets/icon.png" alt="">TapDeck</a><nav><a href="./#how">Try it</a><a href="./#packs">Packs</a><a href="./#pricing">Pricing</a><a href="./#faq">FAQ</a></nav></div></div>
+
+  <main class="wide-wrap">
+    <div class="buy-head">
+      <h1>Buy TapDeck</h1>
+      <p>$9 a year. <span class="muted">Cancel any time. Works on up to 3 Macs.</span></p>
+    </div>
+
+    <div class="buy">
+      <!-- Gallery, like Apple's product gallery on its store pages. -->
+      <div class="gallery" aria-roledescription="carousel" aria-label="TapDeck pictures">
+        <div class="slides" tabindex="0">
+          <div class="slide"><img class="icon" src="assets/icon.png" alt="The TapDeck app icon"></div>
+          <div class="slide"><img src="assets/frames/wide/0080.webp" alt="A MacBook with four fingers tapping its trackpad"></div>
+          <div class="slide"><img src="assets/packs.jpg" alt="TapDeck's six shortcut packs, switched on"></div>
+          <div class="slide"><img src="assets/activate.jpg" alt="TapDeck's Activate window, where you paste your licence key"></div>
+        </div>
+        <div class="controls">
+          <button type="button" class="prev" aria-label="Previous picture">‹</button>
+          <div class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+          <button type="button" class="next" aria-label="Next picture">›</button>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <h2>Plan. <span>Choose your plan.</span></h2>
+          <div class="option" role="radio" aria-checked="true" tabindex="0">
+            <div><b>TapDeck · 1 year</b><small>Up to 3 Macs. Renews yearly, cancel any time.</small></div>
+            <div class="cost"><b>$9/yr.</b>about $0.75/mo.</div>
+          </div>
+        </div>
+        <div class="step">
+          <h2>Included. <span>Everything, from day one.</span></h2>
+          <ul class="checklist">
+            <li>Every gesture: taps, double and triple taps, holds and corners, with 1 to 5 fingers.</li>
+            <li>All six shortcut packs: Everyday Mac, Claude, Browser, Code Editors, Xcode and Terminal.</li>
+            <li>Your own shortcuts, for every app or just one.</li>
+            <li>Every update while your year is active.</li>
+            <li>A full refund within 14 days if it isn't for you.</li>
+          </ul>
+        </div>
+        <div class="step">
+          <h2>How it works. <span>Three steps.</span></h2>
+          <ol class="numbered">
+            <li>Pay securely with Dodo Payments, our merchant of record. Taxes are included where they apply.</li>
+            <li>Your licence key appears on the confirmation page and arrives by email.</li>
+            <li>Download TapDeck, open it and paste your key. Done.</li>
+          </ol>
+        </div>
+        <div class="step">
+          <h2>Questions? <span>We're here.</span></h2>
+          <p class="muted">Read the <a href="./#faq">FAQ</a>, the <a href="refund.html">refund policy</a> and the <a href="terms.html">terms</a>, or visit <a href="https://github.com/Saba-Burduli/tapdeck-releases/issues">support</a>. Requires macOS 14 Sonoma or later and a built-in trackpad or Magic Trackpad.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Apple-style summary bar: what you're buying, the total, and the button. -->
+  <div class="summary" role="region" aria-label="Order summary">
+    <div class="wrap">
+      <img src="assets/icon.png" alt="" width="40" height="40">
+      <div class="what"><b>TapDeck · 1 year</b>Up to 3 Macs</div>
+      <div class="total"><b>$9/yr.</b>Taxes where applicable</div>
+      <a class="btn primary checkout" href="#" aria-disabled="true">Checkout opens soon</a>
+    </div>
+  </div>
+
+  <footer class="site"><div class="wrap">
+    <p class="fine">Payments are processed by Dodo Payments, our merchant of record. TapDeck is not affiliated with Apple Inc. Mac, MacBook and macOS are trademarks of Apple Inc.</p>
+    <div class="row"><span>Copyright © 2026 TapDeck. All rights reserved.</span><nav><a href="terms.html">Terms of Service</a><a href="privacy.html">Privacy Policy</a><a href="refund.html">Refunds</a><a href="https://github.com/Saba-Burduli/tapdeck-releases/issues">Support</a></nav></div>
+  </div></footer>
+
+  <script>
+    // Checkout: Dodo's static payment link for the live "TapDeck — 1 year" product. Until PRODUCT_ID is set,
+    // the button says the checkout opens soon and does nothing.
+    const PRODUCT_ID = null;
+    const button = document.querySelector('.checkout');
+    if (PRODUCT_ID) {
+      const url = new URL(`https://checkout.dodopayments.com/buy/${PRODUCT_ID}`);
+      url.searchParams.set('quantity', '1');
+      url.searchParams.set('redirect_url', new URL('thanks.html', location.href).href);
+      button.href = url.href;
+      button.removeAttribute('aria-disabled');
+      button.textContent = 'Continue to checkout';
+    } else {
+      button.addEventListener('click', (e) => e.preventDefault());
+    }
+
+    // Gallery: swipe, scroll or use the arrows; the dots follow.
+    const slides = document.querySelector('.gallery .slides');
+    const dots = [...document.querySelectorAll('.gallery .dots i')];
+    const go = (d) => slides.scrollBy({ left: d * slides.clientWidth, behavior: 'smooth' });
+    document.querySelector('.gallery .prev').addEventListener('click', () => go(-1));
+    document.querySelector('.gallery .next').addEventListener('click', () => go(1));
+    slides.addEventListener('scroll', () => {
+      const i = Math.round(slides.scrollLeft / slides.clientWidth);
+      dots.forEach((d, k) => d.classList.toggle('on', k === i));
+    }, { passive: true });
+  </script>
+</body>
+</html>
