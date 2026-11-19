@@ -8,7 +8,7 @@
   <meta name="description" content="Buy TapDeck: 3 days free, then $9 a year, for up to 3 Macs. Every gesture and every shortcut pack.">
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="assets/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=20261120a">
+  <link rel="stylesheet" href="styles.css?v=20261120b">
 </head>
 <body>
   <div class="globalnav"><div class="wrap"><a class="mark" href="./"><img src="assets/icon-64.webp" alt="" width="20" height="20">TapDeck</a><nav><a href="./#how">Try it</a><a href="./#packs">Packs</a><a href="./#pricing">Pricing</a><a href="./#faq">FAQ</a></nav></div></div>
@@ -57,7 +57,7 @@
           <h2>How it works. <span>Three steps.</span></h2>
           <ol class="numbered">
             <li>Start your trial with Dodo Payments, our merchant of record. Your card is charged $9 when the 3 days end. Taxes are included where they apply.</li>
-            <li>Your licence key appears on the confirmation page and arrives by email.</li>
+            <li>Your licence key appears on the thank-you page and arrives by email.</li>
             <li>Download TapDeck, open it and paste your key. Done.</li>
           </ol>
         </div>
@@ -85,12 +85,16 @@
   </div></footer>
 
   <script>
-    // Checkout: Dodo's static payment link for the live "TapDeck — 1 year" product. Until PRODUCT_ID is set,
-    // the button says the checkout opens soon and does nothing.
-    const PRODUCT_ID = null;
+    // Checkout: Dodo's static payment link for the "TapDeck — 1 year" product. The live product wins once it exists;
+    // until then the button opens Dodo's test-mode checkout (test cards only, nothing is charged).
+    const LIVE_PRODUCT_ID = null;
+    const TEST_PRODUCT_ID = 'pdt_0NsIJNIQq15JjITp1J3Pm';
+    const PRODUCT_ID = LIVE_PRODUCT_ID || TEST_PRODUCT_ID;
+    const host = LIVE_PRODUCT_ID ? 'https://checkout.dodopayments.com' : 'https://test.checkout.dodopayments.com';
     const button = document.querySelector('.checkout');
+    if (!LIVE_PRODUCT_ID) document.querySelector('.summary .total').insertAdjacentHTML('beforeend', '<span class="testmode">Test mode</span>');
     if (PRODUCT_ID) {
-      const url = new URL(`https://checkout.dodopayments.com/buy/${PRODUCT_ID}`);
+      const url = new URL(`${host}/buy/${PRODUCT_ID}`);
       url.searchParams.set('quantity', '1');
       url.searchParams.set('redirect_url', new URL('thanks.html', location.href).href);
       button.href = url.href;

@@ -217,6 +217,7 @@ footer.site nav a:first-child { padding-left: 0; border-left: 0; }
 /* Text pages: terms, privacy, refunds, thanks. */
 .doc { width: min(692px, 100% - 44px); margin: 0 auto; padding: 72px 0 96px; }
 .doc h1 { font-size: clamp(40px, 6vw, 56px); line-height: 1.07; }
+.summary .testmode { display: inline-block; margin-left: 8px; padding: 1px 7px; border-radius: 980px; background: #fff4e5; color: #b25e00; font-size: 11px; font-weight: 600; vertical-align: 1px; }
 .doc .keybox { display: flex; align-items: center; gap: 12px; margin: 18px 0 8px; padding: 14px 14px 14px 18px; background: var(--panel); border-radius: 14px; }
 .doc .keybox code { flex: 1; min-width: 0; font: 500 15px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; user-select: all; }
 .doc .updated { color: var(--ink-3); font-size: 14px; margin: 10px 0 28px; }
