@@ -6,8 +6,10 @@
   <meta name="color-scheme" content="light">
   <title>Thank you · TapDeck</title>
   <meta name="robots" content="noindex">
+  <!-- The licence key arrives in this page's address; never send it on to other sites in the Referer header. -->
+  <meta name="referrer" content="no-referrer">
   <link rel="icon" href="assets/favicon.png">
-  <link rel="stylesheet" href="styles.css?v=20261119f">
+  <link rel="stylesheet" href="styles.css?v=20261119g">
 </head>
 <body>
   <div class="globalnav"><div class="wrap"><a class="mark" href="./"><img src="assets/icon-64.webp" alt="" width="20" height="20">TapDeck</a><nav><a href="./#how">Try it</a><a href="./#packs">Packs</a><a href="./#pricing">Pricing</a><a href="./#faq">FAQ</a></nav></div></div>
@@ -15,7 +17,11 @@
   <main class="doc">
     <img class="badge" src="assets/icon-256.webp" alt="" width="84" height="84">
     <h1>Thank you.</h1>
-    <p id="status">Your licence key is on its way to your email. It's also on the payment confirmation page you just saw.</p>
+    <p id="status">Your licence key is on its way to your email.</p>
+    <div class="keybox" id="keybox" hidden>
+      <code id="key"></code>
+      <button type="button" class="btn primary small" id="copy">Copy</button>
+    </div>
 
     <h2>1. Download TapDeck</h2>
     <p>Get the latest version from <a href="https://github.com/Saba-Burduli/tapdeck-releases/releases/latest">Releases</a>, open the DMG and drag TapDeck to Applications.</p>
@@ -34,12 +40,29 @@
     <div class="row"><span>Copyright © 2026 TapDeck. All rights reserved.</span><nav><a href="terms.html">Terms of Service</a><a href="privacy.html">Privacy Policy</a><a href="refund.html">Refunds</a><a href="https://github.com/Saba-Burduli/tapdeck-releases/issues">Support</a></nav></div>
   </div></footer>
   <script>
-    // Dodo adds ?status=… to the return URL. Only the wording changes; the key itself always comes from Dodo.
-    const status = new URLSearchParams(location.search).get('status');
+    // Dodo's return URL carries ?status=…&license_key=…. Show the key with a Copy button, then take the query out of
+    // the address bar so the key doesn't linger in history or get shared with the link.
+    const params = new URLSearchParams(location.search);
+    const status = params.get('status');
+    const key = params.get('license_key');
     if (status && status !== 'succeeded' && status !== 'active') {
       document.querySelector('h1').textContent = 'Payment not completed.';
       document.getElementById('status').innerHTML = 'The payment didn\'t go through, so no licence was issued. You can try again from the <a href="buy.html">Buy page</a>.';
+    } else if (key) {
+      document.getElementById('status').textContent = 'Here\'s your licence key. A copy is on its way to your email too.';
+      document.getElementById('key').textContent = key;
+      document.getElementById('keybox').hidden = false;
+      const copy = document.getElementById('copy');
+      copy.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(key); } catch {
+          const r = document.createRange(); r.selectNodeContents(document.getElementById('key'));
+          getSelection().removeAllRanges(); getSelection().addRange(r); document.execCommand('copy');
+        }
+        copy.textContent = 'Copied';
+        setTimeout(() => { copy.textContent = 'Copy'; }, 1800);
+      });
     }
+    if (location.search) history.replaceState(null, '', location.pathname);
   </script>
 </body>
 </html>
