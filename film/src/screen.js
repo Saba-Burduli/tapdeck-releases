@@ -4,7 +4,6 @@ import * as THREE from 'three';
 import { clamp, lerp, smooth, easeOutCubic, easeOutBack, easeInOutCubic, PACK } from './timeline.js';
 
 export const SW = 2048, SH = Math.round(2048 / 1.532);
-const SCALE = 0.75;
 const FONT = '-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif';
 const MENU = 48;
 const DOCK_H = 104;
@@ -213,10 +212,12 @@ function dock(g, icons, running) {
   g.restore();
 }
 
-export function makeScreen() {
+/// `scale`: canvas pixels per SW × SH unit. 0.75 keeps the 16:9 film sharp; the 9:16 cut (phones), where the laptop
+/// is small, uses 0.5 so each change uploads a quarter of the full-size pixels (phones spend ~45 ms on 0.75).
+export function makeScreen({ scale: SCALE = 0.75 } = {}) {
   const canvas = document.createElement('canvas');
-  // Drawn in SW × SH units onto a canvas 3/4 that size: about half the pixels to upload each time the screen changes
-  // (Safari spends ~25 ms uploading the full size), and still sharper than the screen ever appears in the film.
+  // Drawn in SW × SH units onto a smaller canvas (see `scale`): far fewer pixels to upload each time the screen
+  // changes (Safari spends ~25 ms uploading the full size), and still sharper than the screen ever appears in the film.
   canvas.width = Math.round(SW * SCALE); canvas.height = Math.round(SH * SCALE);
   const g = canvas.getContext('2d');
   const texture = new THREE.CanvasTexture(canvas);

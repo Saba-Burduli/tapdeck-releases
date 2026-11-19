@@ -1,7 +1,7 @@
 // Motion that follows the scroll, as on Apple's product pages: text and tiles rise in, the whole 3D teaser plays
 // live as you scroll while its stage stays pinned, numbers count up, and one dark band holds the app's water.
 // No libraries. With Reduce Motion everything simply appears and the film shows its end card.
-import { makeWater } from './water.js?v=20261119c';
+import { makeWater } from './water.js?v=20261119d';
 
 // WebGL2 is what the film, the Try it trackpad's water and the water band need. Browsers with graphics acceleration
 // turned off (or a blocklisted GPU) don't have it; they get a still picture straight away instead of a blank box.
@@ -68,11 +68,12 @@ function film(section) {
     frame.classList.toggle('tall', want === '9x16');
     frame.style.transform = `translate(${(stage.clientWidth - w * scale) / 2}px, ${Math.max(0, (stage.clientHeight - 64 - h * scale) / 2)}px) scale(${scale})`;
     // Sharpness: the film's pixels match the screen's, up to about 2560 × 1440 (3.7 million pixels). Beyond that the
-    // GPU memory grows fast for no visible gain, and weaker Macs and phones lose the tab.
-    const ratio = Math.min(Math.sqrt(3.7e6 / (w * h)), Math.max(0.5, scale * (devicePixelRatio || 1)));
+    // GPU memory grows fast for no visible gain, and weaker Macs and phones lose the tab. Phones' 3× screens get 2×:
+    // half the pixels to fill, and the difference doesn't show at that size.
+    const ratio = Math.min(Math.sqrt(3.7e6 / (w * h)), Math.max(0.5, scale * Math.min(2, devicePixelRatio || 1)));
     if (started && want !== aspect) {
       aspect = want; win = null;
-      iframe.src = `film/index.html?aspect=${want}&bg=ffffff&v=20261119c`;
+      iframe.src = `film/index.html?aspect=${want}&bg=ffffff&v=20261119d`;
     }
     frame.dataset.ratio = ratio;
     if (win) { win.setPixelRatio(ratio); shown = -1; schedule(); }

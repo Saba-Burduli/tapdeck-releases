@@ -159,7 +159,7 @@ const fill = new THREE.DirectionalLight('#ffffff', 0.7); fill.position.set(50, 4
 const camera = new THREE.PerspectiveCamera(30, W / H, 0.5, 600);
 
 const water = makeWater(PAD.w / PAD.h);
-const screen = makeScreen();
+const screen = makeScreen({ scale: tall ? 0.5 : 0.75 });
 const laptop = makeLaptop({ screenTexture: screen.texture, padMaterial: water.material });
 scene.add(laptop.root);
 const cards = makeCards(tall);
