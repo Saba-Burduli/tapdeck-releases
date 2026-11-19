@@ -7,6 +7,12 @@ export function makeWater(canvas, { element = false, autoDrops = !element, finge
   // `dark`: true or false fixes the look; null follows the system setting.
   const gl = canvas && canvas.getContext('webgl2', { premultipliedAlpha: true, antialias: false });
   if (!gl) return null;
+  // Software rendering (graphics acceleration off) can't keep up and stalls the page: leave the canvas empty.
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  if (/swiftshader|llvmpipe|softpipe|software|basic render/i.test(String(gl.getParameter(dbg ? dbg.UNMASKED_RENDERER_WEBGL : gl.RENDERER)))) {
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+    return null;
+  }
   const canRenderFloat = !!gl.getExtension('EXT_color_buffer_float');
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const darkQuery = matchMedia('(prefers-color-scheme: dark)');
@@ -135,23 +141,37 @@ export function makeWater(canvas, { element = false, autoDrops = !element, finge
     outColor = vec4(clamp(color, 0.0, 1.0), 1.0);
   }`;
 
+  // Shaders compile in the background where the browser allows it (KHR_parallel_shader_compile): nothing asks for
+  // their status until they report done, so the page never stalls on them. Until then the canvas stays clear.
+  const parallel = gl.getExtension('KHR_parallel_shader_compile');
+  const shaders = [];
   function program(fs) {
     const p = gl.createProgram();
     for (const [type, src] of [[gl.VERTEX_SHADER, vert], [gl.FRAGMENT_SHADER, fs]]) {
       const s = gl.createShader(type);
       gl.shaderSource(s, src);
       gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.warn(gl.getShaderInfoLog(s)); return null; }
       gl.attachShader(p, s);
+      shaders.push(s);
     }
     gl.linkProgram(p);
-    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) { console.warn(gl.getProgramInfoLog(p)); return null; }
-    const loc = {};
-    for (const n of ['state', 'size', 'counts', 'tune', 'base', 'fingers', 'blobPos', 'blobCol']) loc[n] = gl.getUniformLocation(p, n);
-    return { p, loc };
+    return { p, loc: null };
   }
   const sim = program(stepFrag), draw = program(drawFrag);
-  if (!sim || !draw) return null;
+  // Null while compiling, then true once both programs linked (or false if they failed).
+  let built = null;
+  function checkBuilt() {
+    if (built !== null) return built;
+    if (parallel && ![sim, draw].every(({ p }) => gl.getProgramParameter(p, parallel.COMPLETION_STATUS_KHR))) return null;
+    built = [sim, draw].every(({ p }) => gl.getProgramParameter(p, gl.LINK_STATUS));
+    if (!built) { for (const s of shaders) { const log = gl.getShaderInfoLog(s); if (log) console.warn(log); } return false; }
+    for (const x of [sim, draw]) {
+      x.loc = {};
+      for (const n of ['state', 'size', 'counts', 'tune', 'base', 'fingers', 'blobPos', 'blobCol']) x.loc[n] = gl.getUniformLocation(x.p, n);
+    }
+    canvas.classList.add('on');
+    return true;
+  }
 
   // Ping-pong height fields: about one cell per 2.5 CSS px, like the app.
   let state = [], fbos = [], gw = 0, gh = 0, current = 0;
@@ -233,6 +253,9 @@ export function makeWater(canvas, { element = false, autoDrops = !element, finge
 
   function frame(now) {
     if (!visible || !onScreen || gl.isContextLost()) { running = false; return; }
+    const ready = checkBuilt();
+    if (ready === false) { running = false; return; }
+    if (ready === null) { last = now; requestAnimationFrame(frame); return; }
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
     const t = (now - start) / 1000;
@@ -280,7 +303,6 @@ export function makeWater(canvas, { element = false, autoDrops = !element, finge
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     requestAnimationFrame(frame);
   }
-  canvas.classList.add('on');
   wake();
 
   return {

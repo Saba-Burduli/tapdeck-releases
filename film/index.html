@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>TapDeck teaser</title>
 <script type="importmap">
-{ "imports": { "three": "./vendor/three/three.module.js", "three/addons/": "./vendor/three/addons/" } }
+{ "imports": { "three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/addons/" } }
 </script>
 <!-- laptop.js imports this only after it arrives itself; fetch it alongside the first wave of modules instead. -->
 <link rel="modulepreload" href="./vendor/three/addons/geometries/RoundedBoxGeometry.js">
@@ -17,12 +17,12 @@
   #ui { position: absolute; inset: 0; pointer-events: none; }
 
   .cap { position: absolute; opacity: 0; }
-  .title, .sub, .value, .vsub { text-shadow: 0 0 18px rgba(236,233,227,0.95), 0 0 42px rgba(236,233,227,0.9), 0 0 80px rgba(236,233,227,0.8); }
+  .title, .sub, .value, .vsub { text-shadow: 0 0 18px rgba(236,233,227,0.95), 0 0 48px rgba(236,233,227,0.9); }
   .title { font-weight: 700; letter-spacing: -0.04em; line-height: 1.0; }
   .sub { color: var(--muted); font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; margin-top: 0.12em; }
   .gesture { display: inline-flex; align-items: center; gap: 0.55em; margin-top: 1.1em; color: var(--muted); font-weight: 600; letter-spacing: -0.005em;
-    background: rgba(255,255,255,0.75); border: 1.5px solid rgba(23,25,29,0.08); border-radius: 999px; padding: 0.4em 0.95em 0.42em 0.75em;
-    box-shadow: 0 10px 30px rgba(27,34,48,0.10); backdrop-filter: blur(16px); }
+    background: rgba(255,255,255,0.92); border: 1.5px solid rgba(23,25,29,0.08); border-radius: 999px; padding: 0.4em 0.95em 0.42em 0.75em;
+    box-shadow: 0 10px 30px rgba(27,34,48,0.10); }
   .gesture .dot { width: 0.62em; height: 0.62em; border-radius: 50%; }
   .cap.hero, .cap.top { text-align: center; }
   .cap.right .title, .cap.right .sub { font-size: 96px !important; }
@@ -105,6 +105,14 @@ try {
 } catch (e) {
   window.failed = true;
   throw e;
+}
+// Software rendering (graphics acceleration off, or no usable GPU) would take seconds per frame and freeze the page
+// around it: hand over to the still before building anything.
+{
+  const gl = renderer.getContext();
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  const name = String(gl.getParameter(dbg ? dbg.UNMASKED_RENDERER_WEBGL : gl.RENDERER));
+  if (/swiftshader|llvmpipe|softpipe|software|basic render/i.test(name)) { window.failed = true; renderer.dispose(); await new Promise(() => {}); }
 }
 // If the GPU drops the context (low memory, a driver reset), tell the embedding page so it shows the still.
 renderer.domElement.addEventListener('webglcontextlost', () => { window.failed = true; });
@@ -299,6 +307,9 @@ window.setPixelRatio = (ratio) => {
   renderer.setPixelRatio(ratio);
   renderer.setSize(W, H, false);
 };
+// Compile every shader before the first frame, in parallel where the browser can (KHR_parallel_shader_compile),
+// so the page around the film doesn't freeze while they build.
+try { await renderer.compileAsync(scene, camera); } catch {}
 window.renderAt(0);
 window.ready = true;
 </script>

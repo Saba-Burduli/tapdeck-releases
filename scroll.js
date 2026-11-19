@@ -1,17 +1,14 @@
 // Motion that follows the scroll, as on Apple's product pages: text and tiles rise in, the whole 3D teaser plays
 // live as you scroll while its stage stays pinned, numbers count up, and one dark band holds the app's water.
 // No libraries. With Reduce Motion everything simply appears and the film shows its end card.
-import { makeWater } from './water.js?v=20261119b';
+import { makeWater } from './water.js?v=20261119c';
 
 // WebGL2 is what the film, the Try it trackpad's water and the water band need. Browsers with graphics acceleration
 // turned off (or a blocklisted GPU) don't have it; they get a still picture straight away instead of a blank box.
-export const has3D = (() => {
-  try {
-    const gl = document.createElement('canvas').getContext('webgl2');
-    gl?.getExtension('WEBGL_lose_context')?.loseContext();
-    return !!gl;
-  } catch { return false; }
-})();
+// Browsers that can't make a WebGL2 context (graphics acceleration off, a blocklisted GPU) still define the API; the
+// film itself then reports failure and the still takes over. Probing with a real context here would cost up to a
+// second on slow GPUs before anything else runs.
+export const has3D = 'WebGL2RenderingContext' in window;
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const ease = (k) => 1 - Math.pow(1 - k, 3);
@@ -75,7 +72,7 @@ function film(section) {
     const ratio = Math.min(Math.sqrt(3.7e6 / (w * h)), Math.max(0.5, scale * (devicePixelRatio || 1)));
     if (started && want !== aspect) {
       aspect = want; win = null;
-      iframe.src = `film/index.html?aspect=${want}&bg=ffffff&v=20261119b`;
+      iframe.src = `film/index.html?aspect=${want}&bg=ffffff&v=20261119c`;
     }
     frame.dataset.ratio = ratio;
     if (win) { win.setPixelRatio(ratio); shown = -1; schedule(); }

@@ -103,7 +103,7 @@ section { position: relative; }
 .film.still .film-frame { inset: 0; transform: none !important; }
 .film.still + .film-skip { display: none; }
 .film-chapters { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; gap: 4px; padding: 5px; border-radius: 980px;
-  background: rgba(245,245,247,0.86); backdrop-filter: saturate(1.8) blur(20px); -webkit-backdrop-filter: saturate(1.8) blur(20px); max-width: calc(100% - 32px); overflow-x: auto; scrollbar-width: none; }
+  background: rgba(245,245,247,0.96); max-width: calc(100% - 32px); overflow-x: auto; scrollbar-width: none; }
 .film-chapters button { font: 400 12px/1 var(--text); letter-spacing: -0.01em; color: var(--ink-2); background: transparent; border: 0; border-radius: 980px; padding: 7px 12px; cursor: pointer; white-space: nowrap; transition: background .25s var(--ease), color .25s var(--ease); }
 .film-chapters button[aria-current="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
 .film-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(0,0,0,0.06); }

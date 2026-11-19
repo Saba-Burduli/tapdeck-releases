@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { clamp, lerp, smooth, easeOutCubic, easeOutBack, easeInOutCubic, PACK } from './timeline.js';
 
 export const SW = 2048, SH = Math.round(2048 / 1.532);
+const SCALE = 0.75;
 const FONT = '-apple-system, "SF Pro Text", "Helvetica Neue", sans-serif';
 const MENU = 48;
 const DOCK_H = 104;
@@ -214,7 +215,9 @@ function dock(g, icons, running) {
 
 export function makeScreen() {
   const canvas = document.createElement('canvas');
-  canvas.width = SW; canvas.height = SH;
+  // Drawn in SW × SH units onto a canvas 3/4 that size: about half the pixels to upload each time the screen changes
+  // (Safari spends ~25 ms uploading the full size), and still sharper than the screen ever appears in the film.
+  canvas.width = Math.round(SW * SCALE); canvas.height = Math.round(SH * SCALE);
   const g = canvas.getContext('2d');
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
@@ -239,8 +242,32 @@ export function makeScreen() {
     return r;
   }
 
+  // Everything the screen shows depends on t only through these values. When none of them changed since the last
+  // frame, the picture is the same: skip the redraw and, above all, the texture upload (about 25 ms in Safari).
+  let lastKey = '';
+  function stateKey(t, s) {
+    const mc = easeInOutCubic(clamp((t - s.missionIn) / 0.35)) * (1 - easeInOutCubic(clamp((t - s.missionOut) / 0.35)));
+    const fr = finderRect(t, s);
+    const chromeFront = t >= s.sameCut;
+    const claudeK = t >= s.claudeOpen && t < s.claudeClose ? clamp((t - s.claudeOpen) / 0.4) : 0;
+    const tab = chromeFront ? clamp((t - s.reopenTab) / 0.35) : 0;
+    const pp = clamp((t - s.playPause) / 0.2) * (1 - smooth(s.playPause + 0.85, s.playPause + 1.15, t));
+    const ppK = pp > 0 ? clamp((t - s.playPause) / 0.3) : 0;
+    const sp = clamp((t - s.spotlight) / 0.18) * (1 - smooth(s.spotlightOut - 0.1, s.spotlightOut + 0.1, t));
+    const n = sp > 0 ? Math.max(0, Math.min(s.spotlightText.length, Math.floor((t - s.spotlight - 0.12) / 0.055))) : 0;
+    const blink = sp > 0 ? Math.floor(t * 4) % 2 : 0;
+    const shot = t - s.screenshot;
+    const shotK = shot > 0 && shot < 1.9 ? shot : -1;
+    return [mc, fr.x, fr.y, fr.w, fr.h, chromeFront, claudeK, tab, pp, ppK, sp, n, blink, shotK]
+      .map((v) => (typeof v === 'number' ? Math.round(v * 1000) : v)).join(',');
+  }
+
   function draw(t, tl) {
     const s = tl.screen;
+    const key = stateKey(t, s);
+    if (key === lastKey) return;
+    lastKey = key;
+    g.setTransform(SCALE, 0, 0, SCALE, 0, 0);
     g.globalAlpha = 1;
     g.drawImage(wall, 0, 0);
 
@@ -254,7 +281,7 @@ export function makeScreen() {
 
     let ed = editorRest, br = browserRest, cl = claudeRest;
     if (mc > 0) {
-      g.filter = `blur(${18 * mc}px)`; g.drawImage(wall, 0, 0); g.filter = 'none';
+      g.filter = `blur(${18 * mc * SCALE}px)`; g.drawImage(wall, 0, 0); g.filter = 'none';
       g.fillStyle = `rgba(0,0,0,${0.12 * mc})`; g.fillRect(0, 0, SW, SH);
       ed = lerpRect(ed, fit(ed, grid[0]), mc); br = lerpRect(br, fit(br, grid[1]), mc); cl = lerpRect(cl, fit(cl, grid[3]), mc);
     }
@@ -319,7 +346,7 @@ export function makeScreen() {
         const w = 380, h = w / 1.532, x = SW - w - 40 + (1 - thumbIn) * 460, y = SH - h - DOCK_H - 40;
         g.save(); g.shadowColor = 'rgba(0,0,0,0.3)'; g.shadowBlur = 40;
         rr(g, x, y, w, h, 16); g.fillStyle = '#fff'; g.fill(); g.shadowColor = 'transparent';
-        g.save(); rr(g, x, y, w, h, 16); g.clip(); g.drawImage(canvas, 0, 0, SW, SH, x, y, w, h); g.restore();
+        g.save(); rr(g, x, y, w, h, 16); g.clip(); g.drawImage(canvas, 0, 0, canvas.width, canvas.height, x, y, w, h); g.restore();
         rr(g, x, y, w, h, 16); g.strokeStyle = '#ffffff'; g.lineWidth = 4; g.stroke();
         g.restore();
       }
