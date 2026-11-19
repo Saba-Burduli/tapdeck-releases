@@ -101,11 +101,13 @@ document.documentElement.style.setProperty('--bg', PLATINUM);
 // No WebGL2 (graphics acceleration off, a blocklisted GPU): tell the embedding page so it shows a still at once.
 let renderer;
 try {
-  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gl'), antialias: true, preserveDrawingBuffer: true });
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gl'), antialias: true, powerPreference: 'high-performance' });
 } catch (e) {
   window.failed = true;
   throw e;
 }
+// If the GPU drops the context (low memory, a driver reset), tell the embedding page so it shows the still.
+renderer.domElement.addEventListener('webglcontextlost', () => { window.failed = true; });
 renderer.setPixelRatio(window.devicePixelRatio);   // 1 for 1080p, 2 for the 4K render
 renderer.setSize(W, H, false);
 renderer.toneMapping = THREE.NeutralToneMapping;
@@ -140,7 +142,7 @@ const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 scene.environmentIntensity = 0.9;
 const key = new THREE.DirectionalLight('#ffffff', 1.6); key.position.set(-24, 70, 30); scene.add(key);
-key.castShadow = true; key.shadow.mapSize.set(4096, 4096); key.shadow.radius = 12; key.shadow.blurSamples = 24; key.shadow.bias = -0.0006;
+key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.radius = 6; key.shadow.blurSamples = 12; key.shadow.bias = -0.0006;
 Object.assign(key.shadow.camera, { left: -32, right: 32, top: 32, bottom: -32, near: 20, far: 140 });
 
 const rim = new THREE.DirectionalLight('#cfd8ff', 1.1); rim.position.set(40, 25, -50); scene.add(rim);

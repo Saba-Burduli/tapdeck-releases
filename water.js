@@ -232,7 +232,7 @@ export function makeWater(canvas, { element = false, autoDrops = !element, finge
   if (element) new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; wake(); }).observe(canvas);
 
   function frame(now) {
-    if (!visible || !onScreen) { running = false; return; }
+    if (!visible || !onScreen || gl.isContextLost()) { running = false; return; }
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
     const t = (now - start) / 1000;
