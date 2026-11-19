@@ -4,12 +4,12 @@
     <title>TapDeck</title>
     <link>https://saba-burduli.github.io/tapdeck-releases/appcast.xml</link>
     <item>
-      <title>TapDeck 1.0.1</title>
-      <pubDate>Thu, 19 Nov 2026 21:18:51 +0000</pubDate>
-      <sparkle:version>89</sparkle:version>
-      <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
+      <title>TapDeck 1.0.2</title>
+      <pubDate>Thu, 19 Nov 2026 21:23:01 +0000</pubDate>
+      <sparkle:version>91</sparkle:version>
+      <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <enclosure url="https://saba-burduli.github.io/tapdeck-releases/download/TapDeck-1.0.1.dmg" type="application/octet-stream" sparkle:edSignature="p2YNZXAp2hxRmZiwgYZd4JG2eNrFvvJLq//1w8E43biVYTWaYXCh8Ycm5bAGXdZp0AfhR8m0QzysEJMIAkrGCg==" length="3453109" />
+      <enclosure url="https://saba-burduli.github.io/tapdeck-releases/download/TapDeck-1.0.2.dmg" type="application/octet-stream" sparkle:edSignature="0pZD0+stquYg1O9CVmH1AFHNFCQZNPqthz2gCwSpYmTa+y33wVFSDt47QpISeU2chi/uChA1aBp2YFxWrNFjAg==" length="4229275" />
     </item>
   </channel>
 </rss>
