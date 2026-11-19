@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>TapDeck</title>
+    <link>https://saba-burduli.github.io/tapdeck-releases/appcast.xml</link>
+    <item>
+      <title>TapDeck 1.0.0</title>
+      <pubDate>Thu, 19 Nov 2026 21:13:53 +0000</pubDate>
+      <sparkle:version>87</sparkle:version>
+      <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <enclosure url="https://saba-burduli.github.io/tapdeck-releases/download/TapDeck-1.0.0.dmg" type="application/octet-stream" sparkle:edSignature="BFwYCqsfPIV4CXP1aOwWE2MFlI8AncEqYbHZ1VZ/saOaKDMvqKSItjccwBKKZnFj+uXFIsEM5Y1+PodoUj/GCw==" length="3453167" />
+    </item>
+  </channel>
+</rss>
