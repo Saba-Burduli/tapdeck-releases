@@ -1,28 +1,25 @@
 // "Try it": a virtual MacBook that answers TapDeck's gestures. The screen is the teaser's macOS desktop; the
 // trackpad is the app's water. Phones and iPads use real fingers. On a Mac the browser never sees multi-finger
 // trackpad taps (macOS keeps them), so visitors pick how many fingers and click.
-import { makeScreen } from './screen.js?v=20261117c';
-import { makeRecognizer, RULES, MOUSE_RULES } from './recognizer.js?v=20261117c';
-import { makeWater } from '../water.js?v=20261117c';
+import { makeScreen } from './screen.js?v=20261119a';
+import { makeRecognizer, RULES, MOUSE_RULES } from './recognizer.js?v=20261119a';
+import { makeWater } from '../water.js?v=20261119a';
 
 
 // The app's default packs (Sources/Config/Packs.swift). App packs win while their app is in front.
 const EVERYDAY = { name: 'Everyday Mac', dot: 'rainbow' };
-const CLAUDE = { name: 'Claude', dot: '#D97757' };
-const BROWSER = { name: 'Browser', dot: '#7FB2EE' };
+const BROWSER = { name: 'Chrome', dot: '#4285F4' };
 const BINDINGS = [
-  { key: 'tap4x1', label: '4 fingers · tap', does: 'Snap left', pack: EVERYDAY, run: (a, t) => a.move('left', t) },
-  { key: 'tap4x2', label: '4 fingers · double tap', does: 'Snap right', pack: EVERYDAY, run: (a, t) => a.move('right', t) },
-  { key: 'tap4x3', label: '4 fingers · triple tap', does: 'Full screen', pack: EVERYDAY, run: (a, t) => a.move(a.frontFrame() === 'full' ? 'free' : 'full', t) },
   { key: 'hold3', label: '3 fingers · hold', does: 'Mission Control', pack: EVERYDAY, run: (a, t) => (a.missionControl(t) ? 'Mission Control' : 'Close Mission Control') },
   { key: 'tap5x1', label: '5 fingers · tap', does: 'Play / pause', pack: EVERYDAY, run: (a, t) => a.playPause(t) },
   { key: 'corner-top-right', label: 'Top-right corner', does: 'Spotlight', pack: EVERYDAY, run: (a, t) => a.spotlight(t) },
   { key: 'corner-top-left', label: 'Top-left corner', does: 'Screenshot', pack: EVERYDAY, run: (a, t) => a.screenshot(t) },
-  { key: 'tap3x2', label: '3 fingers · double tap', does: 'Open or hide Claude', pack: CLAUDE, run: (a, t) => a.toggleClaude(t) },
 ];
-// Chrome in front: the Browser pack's gestures take over, so the same tap does something else.
+// Chrome in front: the Chrome pack's gestures take over, so the same hold does something else.
 // A binding's run() may return a string to say what actually happened this time.
 const IN_CHROME = [
+  { key: 'tap3x1', label: '3 fingers · tap', does: 'New tab', pack: BROWSER, run: (a, t) => (a.reopenTab(t) ? 'New tab' : 'New tab: the demo stops at four') },
+  { key: 'hold3', label: '3 fingers · hold', does: 'Search tabs', pack: BROWSER, run: () => 'Search tabs' },
   { key: 'tap4x1', label: '4 fingers · tap', does: 'Reopen closed tab', pack: BROWSER, run: (a, t) => (a.reopenTab(t) ? 'Reopen closed tab' : 'Reopen closed tab: none left to reopen') },
   { key: 'tap4x2', label: '4 fingers · double tap', does: 'Close tab', pack: BROWSER, run: (a, t) => (a.closeTab(t) ? 'Close tab' : 'Close tab: the last tab stays open') },
 ];
@@ -184,7 +181,7 @@ function start(root) {
     screen.act.front(front);
     for (const x of apps) x.setAttribute('aria-pressed', String(x === b));
     renderCheat();
-    say(front === 'chrome' ? 'Chrome is in front: its Browser pack takes over' : 'Finder is in front', front === 'chrome' ? BROWSER : EVERYDAY);
+    say(front === 'chrome' ? 'Chrome is in front: its Chrome pack takes over' : 'Finder is in front', front === 'chrome' ? BROWSER : EVERYDAY);
   });
 
   // Touch screens get real fingers, so the picker hides there.
