@@ -2,14 +2,14 @@
 <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
   <channel>
     <title>TapDeck</title>
-    <link>https://saba-burduli.github.io/tapdeck-releases/appcast.xml</link>
+    <link>https://tapdeck.tech/appcast.xml</link>
     <item>
-      <title>TapDeck 1.0.3</title>
-      <pubDate>Tue, 24 Nov 2026 11:22:23 +0000</pubDate>
-      <sparkle:version>119</sparkle:version>
-      <sparkle:shortVersionString>1.0.3</sparkle:shortVersionString>
+      <title>TapDeck 1.0.4</title>
+      <pubDate>Tue, 24 Nov 2026 17:58:25 +0000</pubDate>
+      <sparkle:version>121</sparkle:version>
+      <sparkle:shortVersionString>1.0.4</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <enclosure url="https://saba-burduli.github.io/tapdeck-releases/download/TapDeck-1.0.3.dmg" type="application/octet-stream" sparkle:edSignature="oJm8zeKNdmvukww1Ng7XRpR6ENQe5EsoTD0UbaBj0KtvAgkfAvz5mpFq26bXQJN8dYXR+puhdudA8dWMAiscDA==" length="4576975" />
+      <enclosure url="https://tapdeck.tech/download/TapDeck-1.0.4.dmg" type="application/octet-stream" sparkle:edSignature="2tvmdas680sTGdBJymao5TI/d1jR7j1wP8f0ZlUtXGN/O7MsCzlIM5yHIe4G8FYgjWjZbg/NbumTLT+ze1r/Cw==" length="4579531" />
     </item>
   </channel>
 </rss>
