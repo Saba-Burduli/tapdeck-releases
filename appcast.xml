@@ -4,12 +4,12 @@
     <title>TapDeck</title>
     <link>https://tapdeck.tech/appcast.xml</link>
     <item>
-      <title>TapDeck 1.0.10</title>
-      <pubDate>Wed, 25 Nov 2026 18:11:35 +0000</pubDate>
-      <sparkle:version>158</sparkle:version>
-      <sparkle:shortVersionString>1.0.10</sparkle:shortVersionString>
+      <title>TapDeck 1.0.11</title>
+      <pubDate>Thu, 26 Nov 2026 15:58:23 +0000</pubDate>
+      <sparkle:version>161</sparkle:version>
+      <sparkle:shortVersionString>1.0.11</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <enclosure url="https://tapdeck.tech/download/TapDeck-1.0.10.dmg" type="application/octet-stream" sparkle:edSignature="T2S+4ROE73Cc2GwbmisGjH+QxJHfBfRUla7KbLBBlRxc/gl3vd4h27prhIsqtuVJshM6m4yrT4xW2F7BU1ChAA==" length="4709687" />
+      <enclosure url="https://tapdeck.tech/download/TapDeck-1.0.11.dmg" type="application/octet-stream" sparkle:edSignature="0MNUYR0XMbR5CbBMKrAKpdBPf7u+19lSGNoOGw4qLDW+i9AKFPEYsjCnuzP37h3iQc60ZMumpo+fZl0SeOx4Dw==" length="4875104" />
     </item>
   </channel>
 </rss>
