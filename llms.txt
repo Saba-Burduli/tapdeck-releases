@@ -1,0 +1,27 @@
+# TapDeck
+
+> TapDeck is a macOS menu-bar app that turns multi-finger taps on a MacBook trackpad or Magic Trackpad into the keyboard shortcuts you use most in each app. $9 a year for up to 3 Macs. Website: https://tapdeck.tech
+
+## What it does
+- Gestures: taps, double taps, triple taps and holds with 3, 4 or 5 fingers, plus one-finger corner taps.
+- Per-app: the same gesture runs the right shortcut for the app in front.
+- 46 ready-made shortcut packs, including Chrome, Safari, Firefox, Arc, Dia, Brave, Zen, Ghostty, Terminal, iTerm2, Warp, VS Code, Cursor, Zed, Xcode, JetBrains, Obsidian, Notes, Mail, Finder, Blender, OBS, Discord, Zoom, Teams, Spotify, Claude and Claude Code & Codex.
+- Examples: 3-finger tap = new tab in browsers and terminals; 4-finger tap = reopen closed tab in browsers; 3-finger hold = Mission Control; 5-finger tap = play/pause; 5-finger double tap = cheat sheet of every gesture.
+- Claude Code & Codex pack: run /compact, /usage, /model and /btw with a tap instead of typing.
+- Custom gestures: do the gesture on the real trackpad, then pick a keystroke, an app to open, any command from an app's menus, or text to type.
+- Doesn't interfere with pointing, clicking, scrolling or macOS system swipes; pauses briefly while you type.
+- Private: no account, no analytics, no tracking; settings stay on the Mac. Works offline for 7 days between licence checks.
+
+## Facts
+- Platform: macOS 14 Sonoma or later; built-in MacBook trackpad or Apple Magic Trackpad.
+- Price: $9 per year, up to 3 Macs, cancel any time. Payments by Dodo Payments (merchant of record).
+- Not on the Mac App Store, because it reads raw finger positions from the trackpad (the same approach as BetterTouchTool).
+- Made by Saba Burduli, an independent developer.
+
+## Links
+- Home and live in-browser demo: https://tapdeck.tech/
+- How custom trackpad gestures work on Mac: https://tapdeck.tech/mac-trackpad-gestures.html
+- TapDeck vs BetterTouchTool: https://tapdeck.tech/bettertouchtool-alternative.html
+- Buy: https://tapdeck.tech/buy.html
+- Support: feedback@tapdeck.tech
+- Instagram (demo videos): https://www.instagram.com/tapdeckmac/
